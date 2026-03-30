@@ -1,0 +1,198 @@
+{
+  "entities": {
+    "User": {
+      "title": "User",
+      "description": "Represents a user of the DispZap platform.",
+      "type": "object",
+      "properties": {
+        "uid": {
+          "type": "string",
+          "description": "The unique identifier for the user, matching the Firebase Auth UID."
+        },
+        "name": {
+          "type": "string",
+          "description": "The user's full name."
+        },
+        "email": {
+          "type": "string",
+          "format": "email",
+          "description": "The user's email address."
+        },
+        "company": {
+          "type": "string",
+          "description": "The name of the user's company."
+        },
+        "plan": {
+          "type": "string",
+          "enum": ["STARTER", "PRO", "ENTERPRISE"],
+          "description": "The user's current subscription plan."
+        },
+        "credits": {
+          "type": "number",
+          "description": "The number of credits the user has available for sending messages."
+        },
+        "creditsUsedToday": {
+          "type": "number",
+          "description": "The number of credits the user has used today."
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "The timestamp when the user account was created."
+        }
+      },
+      "required": ["uid", "name", "email", "plan", "credits", "createdAt"]
+    },
+    "Contact": {
+      "title": "Contact",
+      "description": "Represents a contact in the user's address book.",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "The unique identifier for the contact."
+        },
+        "userId": {
+          "type": "string",
+          "description": "The UID of the user who owns this contact."
+        },
+        "name": {
+          "type": "string",
+          "description": "The contact's name."
+        },
+        "phone": {
+          "type": "string",
+          "description": "The contact's phone number."
+        },
+        "tags": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Tags associated with the contact."
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "The timestamp when the contact was created."
+        }
+      },
+      "required": ["id", "userId", "name", "phone", "createdAt"]
+    },
+    "Campaign": {
+      "title": "Campaign",
+      "description": "Represents a messaging campaign created by the user.",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "The unique identifier for the campaign."
+        },
+        "userId": {
+          "type": "string",
+          "description": "The UID of the user who owns this campaign."
+        },
+        "name": {
+          "type": "string",
+          "description": "The name of the campaign."
+        },
+        "status": {
+          "type": "string",
+          "enum": ["DRAFT", "SCHEDULED", "RUNNING", "COMPLETED", "PAUSED"],
+          "description": "The current status of the campaign."
+        },
+        "progress": {
+          "type": "number",
+          "description": "The progress of the campaign (0-100)."
+        },
+        "sent": {
+          "type": "number",
+          "description": "The number of messages sent."
+        },
+        "failed": {
+          "type": "number",
+          "description": "The number of messages that failed to send."
+        },
+        "total": {
+          "type": "number",
+          "description": "The total number of messages to send."
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "The timestamp when the campaign was created."
+        }
+      },
+      "required": ["id", "userId", "name", "status", "progress", "sent", "failed", "total", "createdAt"]
+    },
+    "Instance": {
+      "title": "Instance",
+      "description": "Represents a WhatsApp instance connected by the user.",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "The unique identifier for the instance."
+        },
+        "userId": {
+          "type": "string",
+          "description": "The UID of the user who owns this instance."
+        },
+        "name": {
+          "type": "string",
+          "description": "The name of the instance."
+        },
+        "status": {
+          "type": "string",
+          "enum": ["CONNECTED", "DISCONNECTED", "PAIRING"],
+          "description": "The current status of the instance."
+        },
+        "provider": {
+          "type": "string",
+          "enum": ["EVOLUTION", "CLOUD_API"],
+          "description": "The provider used for this instance."
+        },
+        "phone": {
+          "type": "string",
+          "description": "The phone number associated with the instance."
+        },
+        "battery": {
+          "type": "number",
+          "description": "The battery level of the connected device (if applicable)."
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "The timestamp when the instance was created."
+        }
+      },
+      "required": ["id", "userId", "name", "status", "provider", "createdAt"]
+    }
+  },
+  "firestore": {
+    "users/{userId}": {
+      "schema": {
+        "$ref": "#/entities/User"
+      },
+      "description": "Stores user profiles. The document ID must match the Firebase Auth UID."
+    },
+    "contacts/{contactId}": {
+      "schema": {
+        "$ref": "#/entities/Contact"
+      },
+      "description": "Stores contacts. Each contact belongs to a user (userId)."
+    },
+    "campaigns/{campaignId}": {
+      "schema": {
+        "$ref": "#/entities/Campaign"
+      },
+      "description": "Stores campaigns. Each campaign belongs to a user (userId)."
+    },
+    "instances/{instanceId}": {
+      "schema": {
+        "$ref": "#/entities/Instance"
+      },
+      "description": "Stores WhatsApp instances. Each instance belongs to a user (userId)."
+    }
+  }
+}

@@ -1,0 +1,211 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ===============================================================
+    // Assumed Data Model
+    // ===============================================================
+    //
+    // Collection: users
+    // Document ID: {userId} (Must match request.auth.uid)
+    // Fields:
+    //   - uid: string (required, immutable) - matches document ID
+    //   - name: string (required, max 100 chars)
+    //   - email: string (required, valid email format)
+    //   - company: string (optional, max 100 chars)
+    //   - plan: string (required, enum: 'STARTER', 'PRO', 'ENTERPRISE')
+    //   - credits: number (required, >= 0)
+    //   - creditsUsedToday: number (optional, >= 0)
+    //   - createdAt: string (required, valid ISO 8601 date string, immutable)
+    //
+    // Collection: contacts
+    // Document ID: {contactId}
+    // Fields:
+    //   - id: string (required, immutable) - matches document ID
+    //   - userId: string (required, immutable) - matches request.auth.uid
+    //   - name: string (required, max 100 chars)
+    //   - phone: string (required, max 20 chars)
+    //   - tags: list of strings (optional, max 20 items, each max 30 chars)
+    //   - createdAt: string (required, valid ISO 8601 date string, immutable)
+    //
+    // Collection: campaigns
+    // Document ID: {campaignId}
+    // Fields:
+    //   - id: string (required, immutable) - matches document ID
+    //   - userId: string (required, immutable) - matches request.auth.uid
+    //   - name: string (required, max 100 chars)
+    //   - status: string (required, enum: 'DRAFT', 'SCHEDULED', 'RUNNING', 'COMPLETED', 'PAUSED')
+    //   - progress: number (required, 0-100)
+    //   - sent: number (required, >= 0)
+    //   - failed: number (required, >= 0)
+    //   - total: number (required, >= 0)
+    //   - createdAt: string (required, valid ISO 8601 date string, immutable)
+    //
+    // Collection: instances
+    // Document ID: {instanceId}
+    // Fields:
+    //   - id: string (required, immutable) - matches document ID
+    //   - userId: string (required, immutable) - matches request.auth.uid
+    //   - name: string (required, max 100 chars)
+    //   - status: string (required, enum: 'CONNECTED', 'DISCONNECTED', 'PAIRING')
+    //   - provider: string (required, enum: 'EVOLUTION', 'CLOUD_API')
+    //   - phone: string (optional, max 20 chars)
+    //   - battery: number (optional, 0-100)
+    //   - createdAt: string (required, valid ISO 8601 date string, immutable)
+    //
+    // ===============================================================
+
+    // ===============================================================
+    // Helper Functions
+    // ===============================================================
+
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    function isDocOwner() {
+      return isAuthenticated() && request.auth.uid == resource.data.userId;
+    }
+
+    function uidUnchanged() {
+      return !('userId' in request.resource.data) || request.resource.data.userId == request.auth.uid;
+    }
+
+    function uidNotModified() {
+      return !('userId' in request.resource.data) || request.resource.data.userId == resource.data.userId;
+    }
+
+    function hasRequiredFields(fields) {
+      return request.resource.data.keys().hasAll(fields);
+    }
+
+    function validStringLength(field, minLen, maxLen) {
+      return request.resource.data[field] is string &&
+        request.resource.data[field].size() >= minLen &&
+        request.resource.data[field].size() <= maxLen;
+    }
+
+    function isValidOptionalString(field, minLen, maxLen) {
+      return !(field in request.resource.data) ||
+             (request.resource.data[field] is string &&
+              request.resource.data[field].size() >= minLen &&
+              request.resource.data[field].size() <= maxLen);
+    }
+
+    function isValidEmail(email) {
+      return email is string && (email == "" || email.matches("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$"));
+    }
+
+    function isValidDateString(dateStr) {
+      return dateStr is string && dateStr.matches("^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}.*Z?$");
+    }
+
+    function isPositive(field) {
+      return request.resource.data[field] is number && request.resource.data[field] >= 0;
+    }
+
+    function areImmutableFieldsUnchanged(fields) {
+      return !request.resource.data.diff(resource.data).affectedKeys().hasAny(fields);
+    }
+
+    function isAdmin() {
+      return isAuthenticated() &&
+        (get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin' ||
+          (request.auth.token.email == "ygorsantos131421@gmail.com" && request.auth.token.email_verified == true));
+    }
+
+    // ===============================================================
+    // Domain Validators
+    // ===============================================================
+
+    function isValidUser(data) {
+      let allowedFields = ['id', 'uid', 'name', 'email', 'company', 'plan', 'credits', 'creditsUsedToday', 'createdAt', 'avatarUrl', 'role'];
+      return request.resource.data.keys().hasOnly(allowedFields) &&
+             data.uid == request.auth.uid &&
+             data.id == request.auth.uid;
+    }
+
+    function isValidContact(data) {
+      let allowedFields = ['id', 'userId', 'name', 'phone', 'tags', 'createdAt', 'status', 'lastInteracted'];
+      return request.resource.data.keys().hasOnly(allowedFields) &&
+             hasRequiredFields(['id', 'userId', 'name', 'phone', 'createdAt', 'status']) &&
+             data.userId == request.auth.uid &&
+             validStringLength('id', 1, 100) &&
+             validStringLength('name', 1, 100) &&
+             validStringLength('phone', 1, 20) &&
+             data.status in ['VALID', 'INVALID', 'OPT_OUT'] &&
+             (!( 'lastInteracted' in data ) || isValidDateString(data.lastInteracted)) &&
+             (!( 'tags' in data ) || (data.tags is list && data.tags.size() <= 20)) &&
+             isValidDateString(data.createdAt);
+    }
+
+    function isValidCampaign(data) {
+      let allowedFields = ['id', 'userId', 'name', 'message', 'scheduledFor', 'status', 'progress', 'sent', 'failed', 'total', 'createdAt', 'tags'];
+      return request.resource.data.keys().hasOnly(allowedFields) &&
+             hasRequiredFields(['id', 'userId', 'name', 'message', 'status', 'progress', 'sent', 'failed', 'total', 'createdAt']) &&
+             data.userId == request.auth.uid &&
+             validStringLength('id', 1, 100) &&
+             validStringLength('name', 1, 100) &&
+             validStringLength('message', 1, 5000) &&
+             (!( 'scheduledFor' in data ) || isValidDateString(data.scheduledFor)) &&
+             data.status in ['DRAFT', 'SCHEDULED', 'RUNNING', 'COMPLETED', 'PAUSED', 'FAILED'] &&
+             data.progress is number && data.progress >= 0 && data.progress <= 100 &&
+             isPositive('sent') &&
+             isPositive('failed') &&
+             isPositive('total') &&
+             (!( 'tags' in data ) || (data.tags is list && data.tags.size() <= 20)) &&
+             isValidDateString(data.createdAt);
+    }
+
+    function isValidInstance(data) {
+      let allowedFields = ['id', 'userId', 'name', 'status', 'provider', 'phone', 'battery', 'createdAt'];
+      return request.resource.data.keys().hasOnly(allowedFields) &&
+             hasRequiredFields(['id', 'userId', 'name', 'status', 'provider', 'createdAt']) &&
+             data.userId == request.auth.uid &&
+             validStringLength('id', 1, 100) &&
+             validStringLength('name', 1, 100) &&
+             data.status in ['CONNECTED', 'DISCONNECTED', 'PAIRING'] &&
+             data.provider in ['Z-API', 'EVOLUTION', 'BAILEYS', 'CLOUD_API'] &&
+             isValidOptionalString('phone', 0, 20) &&
+             (!( 'battery' in data ) || (data.battery is number && data.battery >= 0 && data.battery <= 100)) &&
+             isValidDateString(data.createdAt);
+    }
+
+    // ===============================================================
+    // Rules
+    // ===============================================================
+
+    match /users/{userId} {
+      allow read: if isOwner(userId) || isAdmin();
+      allow create: if (isOwner(userId) && isValidUser(request.resource.data) && (!('role' in request.resource.data) || request.resource.data.role == 'user' || isAdmin())) || isAdmin();
+      allow update: if (isOwner(userId) && isValidUser(request.resource.data) && areImmutableFieldsUnchanged(['id', 'uid', 'createdAt']) && (!('role' in request.resource.data) || request.resource.data.role == resource.data.role || isAdmin())) || isAdmin();
+      allow delete: if isAdmin();
+    }
+
+    match /contacts/{contactId} {
+      allow read: if isDocOwner() || isAdmin();
+      allow create: if (isAuthenticated() && isValidContact(request.resource.data)) || isAdmin();
+      allow update: if (isDocOwner() && isValidContact(request.resource.data) && areImmutableFieldsUnchanged(['id', 'userId', 'createdAt'])) || isAdmin();
+      allow delete: if isDocOwner() || isAdmin();
+    }
+
+    match /campaigns/{campaignId} {
+      allow read: if isDocOwner() || isAdmin();
+      allow create: if (isAuthenticated() && isValidCampaign(request.resource.data)) || isAdmin();
+      allow update: if (isDocOwner() && isValidCampaign(request.resource.data) && areImmutableFieldsUnchanged(['userId', 'createdAt'])) || isAdmin();
+      allow delete: if isDocOwner() || isAdmin();
+    }
+
+    match /instances/{instanceId} {
+      allow read: if isDocOwner() || isAdmin();
+      allow create: if (isAuthenticated() && isValidInstance(request.resource.data)) || isAdmin();
+      allow update: if (isDocOwner() && isValidInstance(request.resource.data) && areImmutableFieldsUnchanged(['id', 'userId', 'createdAt', 'provider'])) || isAdmin();
+      allow delete: if isDocOwner() || isAdmin();
+    }
+  }
+}
