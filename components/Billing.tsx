@@ -89,7 +89,11 @@ const Billing = () => {
               <button 
                 onClick={(e) => {
                   e.stopPropagation();
-                  handleWhatsAppRedirect('plan', plan);
+                  if (isSelected) {
+                    handleWhatsAppRedirect('plan', plan);
+                  } else {
+                    setSelectedPlanId(plan.id);
+                  }
                 }}
                 className={`w-full py-3 rounded-xl font-bold transition-all ${
                 isSelected

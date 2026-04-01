@@ -114,7 +114,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           email: firebaseUser.email || '',
           company: '',
           plan: 'STARTER',
-          credits: 100, // Initial credits for testing
+          credits: 0, // Initial credits for testing
           creditsUsedToday: 0,
           createdAt: new Date().toISOString()
         };
@@ -180,7 +180,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         email: email,
         company: '',
         plan: 'STARTER',
-        credits: 100,
+        credits: 0,
         creditsUsedToday: 0,
         createdAt: new Date().toISOString()
       };

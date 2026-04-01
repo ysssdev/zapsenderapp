@@ -14,11 +14,8 @@ const Instances = () => {
     const fetchInstances = async () => {
       try {
         // In a real scenario, you'd have an endpoint to list instances.
-        // For now, we'll keep the initial state, 
-        // but you should replace this with a real API call when available.
-        setInstances([
-          { id: 'inst_1', name: 'Dr. Marcelo Figueira (SELO)', status: 'CONNECTED', provider: 'EVOLUTION', phone: '+55 31 99999-9999', battery: 100 }
-        ]);
+        // For now, we'll start with an empty list of instances
+        setInstances([]);
       } catch (error) {
         console.error("Error fetching instances:", error);
       }
