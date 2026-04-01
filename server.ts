@@ -129,7 +129,7 @@ async function startServer() {
   // API Routes (Backend)
   // ==========================================
   app.get("/api/health", (req, res) => {
-    res.json({ status: "ok", message: "DispZap Backend is running!" });
+    res.json({ status: "ok", message: "ZapSender Backend is running!" });
   });
 
   // Evolution API Proxy Routes

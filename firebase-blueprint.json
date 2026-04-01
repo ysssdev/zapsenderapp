@@ -2,7 +2,7 @@
   "entities": {
     "User": {
       "title": "User",
-      "description": "Represents a user of the DispZap platform.",
+      "description": "Represents a user of the ZapSender platform.",
       "type": "object",
       "properties": {
         "uid": {

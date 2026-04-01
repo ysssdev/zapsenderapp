@@ -74,7 +74,7 @@ const Login = () => {
               <Zap className="text-white w-6 h-6" fill="currentColor" />
             </div>
             <h1 className="text-2xl font-bold tracking-tight text-white">
-              Disp<span className="font-light text-emerald-200">Zap</span>
+              Zap<span className="font-light text-emerald-200">Sender</span>
             </h1>
           </div>
         </div>
@@ -144,7 +144,7 @@ const Login = () => {
             <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-500 flex items-center justify-center mx-auto mb-4">
               <Zap className="text-white w-6 h-6" fill="currentColor" />
             </div>
-            <h1 className="text-2xl font-bold text-white">DispZap</h1>
+            <h1 className="text-2xl font-bold text-white">ZapSender</h1>
           </div>
 
           <div>
