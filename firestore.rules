@@ -176,6 +176,20 @@ service cloud.firestore {
              isValidDateString(data.createdAt);
     }
 
+    function isValidTemplate(data) {
+      let allowedFields = ['id', 'userId', 'name', 'content', 'status', 'rejectionReason', 'createdAt', 'updatedAt'];
+      return request.resource.data.keys().hasOnly(allowedFields) &&
+             hasRequiredFields(['id', 'userId', 'name', 'content', 'status', 'createdAt', 'updatedAt']) &&
+             data.userId == request.auth.uid &&
+             validStringLength('id', 1, 100) &&
+             validStringLength('name', 1, 100) &&
+             validStringLength('content', 1, 5000) &&
+             data.status in ['PENDING', 'APPROVED', 'REJECTED'] &&
+             (!( 'rejectionReason' in data ) || validStringLength('rejectionReason', 0, 500)) &&
+             isValidDateString(data.createdAt) &&
+             isValidDateString(data.updatedAt);
+    }
+
     // ===============================================================
     // Rules
     // ===============================================================
@@ -185,6 +199,13 @@ service cloud.firestore {
       allow create: if (isOwner(userId) && isValidUser(request.resource.data) && (!('role' in request.resource.data) || request.resource.data.role == 'user' || isAdmin())) || isAdmin();
       allow update: if (isOwner(userId) && isValidUser(request.resource.data) && areImmutableFieldsUnchanged(['id', 'uid', 'createdAt']) && (!('role' in request.resource.data) || request.resource.data.role == resource.data.role || isAdmin())) || isAdmin();
       allow delete: if isAdmin();
+    }
+
+    match /templates/{templateId} {
+      allow read: if isDocOwner() || isAdmin();
+      allow create: if (isAuthenticated() && isValidTemplate(request.resource.data) && request.resource.data.status == 'PENDING') || isAdmin();
+      allow update: if (isDocOwner() && isValidTemplate(request.resource.data) && areImmutableFieldsUnchanged(['id', 'userId', 'createdAt']) && request.resource.data.status == 'PENDING') || isAdmin();
+      allow delete: if isDocOwner() || isAdmin();
     }
 
     match /contacts/{contactId} {

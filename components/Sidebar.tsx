@@ -12,7 +12,9 @@ import {
   Zap,
   Download,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  FileText,
+  ShieldCheck
 } from 'lucide-react';
 
 interface SidebarProps {
@@ -35,6 +37,7 @@ const Sidebar = ({ isCollapsed, setIsCollapsed }: SidebarProps) => {
     { icon: Users, label: 'Contatos', path: '/app/contacts' },
     { icon: Download, label: 'Extrair Grupos', path: '/app/extractor' },
     { icon: Smartphone, label: 'Instâncias', path: '/app/instances' },
+    { icon: FileText, label: 'Templates', path: '/app/templates' },
     { icon: CreditCard, label: 'Planos & Créditos', path: '/app/billing' },
   ];
 
@@ -42,6 +45,7 @@ const Sidebar = ({ isCollapsed, setIsCollapsed }: SidebarProps) => {
   const isAdmin = user?.role === 'admin' || user?.email === 'ygorsantos131421@gmail.com';
 
   if (isAdmin) {
+    navItems.push({ icon: ShieldCheck, label: 'Aprovar Templates', path: '/app/admin-templates' });
     navItems.push({ icon: Settings, label: 'Administração', path: '/app/admin' });
   }
 

@@ -167,9 +167,58 @@
         }
       },
       "required": ["id", "userId", "name", "status", "provider", "createdAt"]
+    },
+    "Template": {
+      "title": "Template",
+      "description": "Represents a message template created by the user to be approved by an admin.",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "The unique identifier for the template."
+        },
+        "userId": {
+          "type": "string",
+          "description": "The UID of the user who owns this template."
+        },
+        "name": {
+          "type": "string",
+          "description": "The name of the template."
+        },
+        "content": {
+          "type": "string",
+          "description": "The message content of the template."
+        },
+        "status": {
+          "type": "string",
+          "enum": ["PENDING", "APPROVED", "REJECTED"],
+          "description": "The approval status of the template."
+        },
+        "rejectionReason": {
+          "type": "string",
+          "description": "The reason for rejection if the status is REJECTED."
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "The timestamp when the template was created."
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "The timestamp when the template was last updated."
+        }
+      },
+      "required": ["id", "userId", "name", "content", "status", "createdAt", "updatedAt"]
     }
   },
   "firestore": {
+    "templates/{templateId}": {
+      "schema": {
+        "$ref": "#/entities/Template"
+      },
+      "description": "Stores message templates. Each template belongs to a user (userId)."
+    },
     "users/{userId}": {
       "schema": {
         "$ref": "#/entities/User"

@@ -14,6 +14,7 @@ const Campaigns = () => {
   // State for the list of campaigns
   const [campaigns, setCampaigns] = useState<Campaign[]>([]);
   const [instances, setInstances] = useState<Instance[]>([]);
+  const [approvedTemplates, setApprovedTemplates] = useState<any[]>([]);
 
   // Form State
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -23,6 +24,7 @@ const Campaigns = () => {
   const [delayMin, setDelayMin] = useState(30);
   const [delayMax, setDelayMax] = useState(60);
   const [selectedInstance, setSelectedInstance] = useState<string>('');
+  const [selectedTemplateId, setSelectedTemplateId] = useState<string>('');
 
   useEffect(() => {
     if (!user) return;
@@ -47,13 +49,36 @@ const Campaigns = () => {
   }, [user]);
 
   useEffect(() => {
+    if (!user) return;
+
+    const q = query(
+      collection(db, 'templates'),
+      where('userId', '==', user.uid),
+      where('status', '==', 'APPROVED')
+    );
+
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      const tmpls: any[] = [];
+      snapshot.forEach((doc) => {
+        tmpls.push({ id: doc.id, ...doc.data() });
+      });
+      setApprovedTemplates(tmpls);
+    }, (error) => {
+      console.error("Error fetching templates:", error);
+    });
+
+    return () => unsubscribe();
+  }, [user]);
+
+  useEffect(() => {
     const fetchInstances = async () => {
       try {
         // In a real scenario, you'd have an endpoint to list instances.
         // For now, we'll keep the initial state, 
         // but you should replace this with a real API call when available.
         setInstances([
-          { id: 'inst_1', name: 'Dr. Marcelo Figueira (SELO)', status: 'CONNECTED', provider: 'EVOLUTION', phone: '+55 31 99999-9999', battery: 100 }
+          { id: 'inst_1', name: 'Dr. Marcelo Figueira (SELO)', status: 'CONNECTED', provider: 'EVOLUTION', phone: '+55 31 99999-9999', battery: 100 },
+          { id: 'inst_2', name: 'Governo Regularização', status: 'CONNECTED', provider: 'EVOLUTION', phone: '+55 31 99999-8888', battery: 100 }
         ]);
       } catch (error) {
         console.error("Error fetching instances:", error);
@@ -286,7 +311,7 @@ const Campaigns = () => {
                   >
                     <option value="">Selecione uma instância...</option>
                     {instances.filter(i => i.status === 'CONNECTED').map(inst => (
-                      <option key={inst.id} value={inst.name}>{inst.name} ({inst.phone})</option>
+                      <option key={inst.id} value={inst.name}>{inst.name}</option>
                     ))}
                   </select>
                 </div>
@@ -372,10 +397,10 @@ const Campaigns = () => {
                 </div>
                 <div className="flex-1 p-4 bg-[url('https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png')] bg-opacity-10 dark:opacity-5 opacity-80">
                   {message && (
-                    <div className="bg-[#005c4b] text-gray-100 p-2 rounded-lg rounded-tr-none max-w-[85%] self-end ml-auto text-sm shadow-sm border border-gray-200/50 dark:border-transparent">
+                    <div className="bg-[#005c4b] text-white p-3 rounded-lg rounded-tr-none max-w-[85%] self-end ml-auto text-sm shadow-sm border border-transparent">
                       {message.replace(/{{nome}}/g, 'João').replace(/{{empresa}}/g, 'ACME Ltda')}
-                      <div className="text-[10px] text-gray-500 text-right mt-1 flex items-center justify-end gap-1">
-                        14:32 <span className="text-blue-500 dark:text-blue-400">✓✓</span>
+                      <div className="text-[10px] text-gray-300 text-right mt-1 flex items-center justify-end gap-1">
+                        14:32 <span className="text-blue-400">✓✓</span>
                       </div>
                     </div>
                   )}
