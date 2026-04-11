@@ -15,7 +15,7 @@ const Billing = () => {
   const selectedPackage = CREDIT_PACKAGES.find(p => p.id === selectedPackageId) || CREDIT_PACKAGES[1];
 
   const handleWhatsAppRedirect = (type: 'plan' | 'credits', details: any) => {
-    const phoneNumber = '5519984445713';
+    const phoneNumber = '5511978020765';
     let message = '';
     if (type === 'plan') {
       message = `Olá! Gostaria de assinar o plano ${details.name} (R$ ${details.price}/mês).`;

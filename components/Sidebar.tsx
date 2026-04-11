@@ -14,7 +14,8 @@ import {
   ChevronLeft,
   ChevronRight,
   FileText,
-  ShieldCheck
+  ShieldCheck,
+  MessageSquare
 } from 'lucide-react';
 
 interface SidebarProps {
@@ -36,6 +37,7 @@ const Sidebar = ({ isCollapsed, setIsCollapsed }: SidebarProps) => {
     { icon: Send, label: 'Campanhas', path: '/app/campaigns' },
     { icon: Users, label: 'Contatos', path: '/app/contacts' },
     { icon: Download, label: 'Extrair Grupos', path: '/app/extractor' },
+    { icon: MessageSquare, label: 'Auto ADM', path: '/app/auto-admin' },
     { icon: Smartphone, label: 'Instâncias', path: '/app/instances' },
     { icon: FileText, label: 'Templates', path: '/app/templates' },
     { icon: CreditCard, label: 'Planos & Créditos', path: '/app/billing' },
