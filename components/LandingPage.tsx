@@ -16,10 +16,7 @@ const LandingPage = () => {
   };
 
   const handleWhatsAppRedirect = (planName: string, price: number) => {
-    const phoneNumber = '5511978020765';
-    const message = `Olá! Gostaria de assinar o plano ${planName} (R$ ${price}/mês).`;
-    const encodedMessage = encodeURIComponent(message);
-    window.open(`https://wa.me/${phoneNumber}?text=${encodedMessage}`, '_blank');
+    window.open(`https://discord.gg/DNk4T4KT`, '_blank');
   };
 
   return (
@@ -95,7 +92,7 @@ const LandingPage = () => {
             Começar Agora <ArrowRight size={20} />
           </button>
           <a 
-            href="https://wa.me/5511978020765"
+            href="https://discord.gg/DNk4T4KT"
             target="_blank"
             rel="noopener noreferrer"
             className="w-full sm:w-auto bg-white/5 border border-white/10 text-white px-8 py-4 rounded-full font-bold text-lg hover:bg-white/10 transition-all flex items-center justify-center gap-2"

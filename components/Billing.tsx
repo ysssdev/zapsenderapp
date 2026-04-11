@@ -15,15 +15,7 @@ const Billing = () => {
   const selectedPackage = CREDIT_PACKAGES.find(p => p.id === selectedPackageId) || CREDIT_PACKAGES[1];
 
   const handleWhatsAppRedirect = (type: 'plan' | 'credits', details: any) => {
-    const phoneNumber = '5511978020765';
-    let message = '';
-    if (type === 'plan') {
-      message = `Olá! Gostaria de assinar o plano ${details.name} (R$ ${details.price}/mês).`;
-    } else {
-      message = `Olá! Gostaria de comprar o pacote de ${details.credits.toLocaleString()} créditos (R$ ${details.price.toFixed(2).replace('.', ',')}).`;
-    }
-    const encodedMessage = encodeURIComponent(message);
-    window.open(`https://wa.me/${phoneNumber}?text=${encodedMessage}`, '_blank');
+    window.open(`https://discord.gg/DNk4T4KT`, '_blank');
   };
 
   return (
