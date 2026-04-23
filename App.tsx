@@ -10,6 +10,7 @@ import AdminPanel from './components/AdminPanel';
 import Login from './components/Login';
 import GroupExtractor from './components/GroupExtractor';
 import AutoAdmin from './components/AutoAdmin';
+import Cloacker from './components/Cloacker';
 import LandingPage from './components/LandingPage';
 import Templates from './components/Templates';
 import AdminTemplates from './components/AdminTemplates';
@@ -53,6 +54,7 @@ const AppRoutes = () => {
         <Route path="contacts" element={<Contacts />} />
         <Route path="extractor" element={<GroupExtractor />} />
         <Route path="auto-admin" element={<AutoAdmin />} />
+        <Route path="cloacker" element={<Cloacker />} />
         <Route path="instances" element={<Instances />} />
         <Route path="templates" element={<Templates />} />
         <Route path="billing" element={<Billing />} />
