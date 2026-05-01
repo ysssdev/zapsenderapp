@@ -3,7 +3,7 @@ import { Play, Pause, Trash2, Edit3, Calendar, Plus, Clock, Users, X, Save, Smar
 import { Campaign, CampaignStatus, Instance } from '../types';
 import { useSearchParams } from 'react-router-dom';
 import { db } from '../firebase';
-import { collection, addDoc, updateDoc, deleteDoc, doc, onSnapshot, query, where, orderBy, getDocs } from 'firebase/firestore';
+import { collection, addDoc, updateDoc, deleteDoc, doc, onSnapshot, query, where, orderBy, getDocs, setDoc } from 'firebase/firestore';
 import { useAuth } from '../context/AuthContext';
 
 const Campaigns = () => {
@@ -243,19 +243,25 @@ const Campaigns = () => {
     try {
       if (editingId) {
         // Update existing
-        await updateDoc(doc(db, 'campaigns', editingId), {
+        const updateData: any = {
           name,
           message,
-          scheduledFor: scheduledFor || null,
           status: scheduledFor ? 'SCHEDULED' : 'DRAFT'
-        });
+        };
+        if (scheduledFor) {
+          updateData.scheduledFor = scheduledFor;
+        } else {
+          // If clearing scheduledFor, we could delete it, but simplest is to just omit or use deleteField(). We'll just update status to DRAFT.
+        }
+        await updateDoc(doc(db, 'campaigns', editingId), updateData);
       } else {
         // Create new
-        await addDoc(collection(db, 'campaigns'), {
+        const newDocRef = doc(collection(db, 'campaigns'));
+        const newData: any = {
+          id: newDocRef.id,
           userId: user.uid,
           name,
           message,
-          scheduledFor: scheduledFor || null,
           createdAt: new Date().toISOString(),
           status: scheduledFor ? 'SCHEDULED' : 'DRAFT',
           total: 0,
@@ -263,7 +269,11 @@ const Campaigns = () => {
           failed: 0,
           progress: 0,
           tags: []
-        });
+        };
+        if (scheduledFor) {
+          newData.scheduledFor = scheduledFor;
+        }
+        await setDoc(newDocRef, newData);
       }
       closeEditor();
     } catch (error) {
@@ -276,7 +286,10 @@ const Campaigns = () => {
     return (
       <div className="animate-fade-in max-w-5xl mx-auto">
         <div className="flex items-center justify-between mb-8">
-          <h2 className="text-2xl font-bold text-white">{editingId ? 'Editar Campanha' : 'Nova Campanha'}</h2>
+          <div>
+            <h2 className="text-2xl font-bold text-white">{editingId ? 'Editar Campanha' : 'Nova Campanha'}</h2>
+            <p className="text-neon-green/80 text-sm mt-1">Limite: 2.000 disparos simultâneos por campanha</p>
+          </div>
           <button 
             onClick={closeEditor}
             className="p-2 hover:bg-white/10 rounded-lg text-gray-400 hover:text-white transition-colors"
