@@ -3,6 +3,7 @@ import { Upload, Download, Filter, Search, Tag, MoreVertical, Trash2 } from 'luc
 import { db } from '../firebase';
 import { collection, addDoc, getDocs, query, where, deleteDoc, doc, onSnapshot } from 'firebase/firestore';
 import { useAuth } from '../context/AuthContext';
+import * as XLSX from 'xlsx';
 
 const Contacts = () => {
   const { user } = useAuth();
@@ -36,13 +37,14 @@ const Contacts = () => {
       return;
     }
 
-    const headers = ['id', 'name', 'phone', 'tags', 'status'];
+    const headers = ['id', 'name', 'phone', 'cpf', 'tags', 'status'];
     const csvContent = [
       headers.join(','),
       ...contacts.map(contact => [
         contact.id,
         `"${contact.name}"`,
         contact.phone,
+        `"${contact.cpf || ''}"`,
         `"${(contact.tags || []).join(';')}"`,
         contact.status
       ].join(','))
@@ -68,53 +70,81 @@ const Contacts = () => {
 
     const reader = new FileReader();
     reader.onload = async (e) => {
-      const text = e.target?.result as string;
-      if (!text) return;
-
-      const lines = text.split('\n');
-      let importedCount = 0;
-
-      // Simple CSV parser
-      // Expected format: name,phone,tags (optional)
-      // Skip header if present
-      const startIndex = lines[0].toLowerCase().includes('name') || lines[0].toLowerCase().includes('nome') ? 1 : 0;
-
-      for (let i = startIndex; i < lines.length; i++) {
-        const line = lines[i].trim();
-        if (!line) continue;
-
-        const parts = line.split(',');
+      try {
+        const data = new Uint8Array(e.target?.result as ArrayBuffer);
+        const workbook = XLSX.read(data, { type: 'array' });
+        const sheetName = workbook.SheetNames[0];
+        const worksheet = workbook.Sheets[sheetName];
         
-        if (parts.length >= 2) {
-          const name = parts[0].replace(/^"|"$/g, '').trim();
-          const phone = parts[1].replace(/^"|"$/g, '').trim();
-          const tagsStr = parts[2] ? parts[2].replace(/^"|"$/g, '').trim() : '';
-          const tags = tagsStr ? tagsStr.split(';').map(t => t.trim()) : [];
+        const rows = XLSX.utils.sheet_to_json(worksheet, { header: 1 }) as any[];
+        if (rows.length === 0) return;
 
-          try {
-            await addDoc(collection(db, 'contacts'), {
-              userId: user.uid,
-              name,
-              phone,
-              tags,
-              status: 'VALID',
-              createdAt: new Date().toISOString()
-            });
-            importedCount++;
-          } catch (error) {
-            console.error("Error adding contact:", error);
+        let importedCount = 0;
+        
+        // Find column indices
+        const headerRow = (rows[0] || []).map((h: any) => String(h || '').toLowerCase().trim());
+        let nameIdx = headerRow.findIndex((h: string) => h.includes('nome') || h.includes('name'));
+        let phoneIdx = headerRow.findIndex((h: string) => h === 'numero' || h.includes('número') || h.includes('telefone') || h.includes('phone') || h === 'celular');
+        let cpfIdx = headerRow.findIndex((h: string) => h === 'cpf' || h.includes('documento'));
+        let tagsIdx = headerRow.findIndex((h: string) => h.includes('tag'));
+
+        // Fallbacks if headers are not clearly labeled
+        if (nameIdx === -1) nameIdx = 0;
+        if (phoneIdx === -1) phoneIdx = 1;
+        if (cpfIdx === -1) cpfIdx = 2; // Default CPF to 3rd column if not specified
+        if (tagsIdx === -1) tagsIdx = 3;
+
+        // Determine start index for data
+        const hasHeaders = headerRow.some((h: string) => h.includes('nome') || h.includes('name') || h === 'numero' || h.includes('cpf'));
+        const startIndex = hasHeaders ? 1 : 0;
+
+        for (let i = startIndex; i < rows.length; i++) {
+          const row = rows[i];
+          if (!row || row.length === 0) continue;
+
+          const name = row[nameIdx] ? String(row[nameIdx]).trim() : '';
+          const phone = row[phoneIdx] ? String(row[phoneIdx]).trim() : '';
+          const cpf = row[cpfIdx] ? String(row[cpfIdx]).trim() : '';
+          const tagsStr = row[tagsIdx] ? String(row[tagsIdx]).trim() : '';
+          
+          let tags = tagsStr ? tagsStr.split(';').map(t => t.trim()) : [];
+
+          // Sometimes CPF might be in the tags column if it's a legacy CSV format, handling that edge case:
+          let finalCpf = cpf;
+          if (!finalCpf && tagsStr && /^[\d.\-\s]+$/.test(tagsStr) && tagsStr.replace(/\D/g, '').length === 11) {
+             finalCpf = tagsStr;
+             tags = [];
+          }
+
+          if (name && phone) {
+            try {
+              await addDoc(collection(db, 'contacts'), {
+                userId: user.uid,
+                name,
+                phone,
+                cpf: finalCpf,
+                tags,
+                status: 'VALID',
+                createdAt: new Date().toISOString()
+              });
+              importedCount++;
+            } catch (error) {
+              console.error("Error adding contact:", error);
+            }
           }
         }
+        
+        if (fileInputRef.current) {
+          fileInputRef.current.value = '';
+        }
+        
+        alert(`${importedCount} contatos importados com sucesso!`);
+      } catch (error) {
+        console.error("Error parsing file:", error);
+        alert("Erro ao processar o arquivo. Verifique se é um arquivo Excel ou CSV válido.");
       }
-      
-      // Reset input
-      if (fileInputRef.current) {
-        fileInputRef.current.value = '';
-      }
-      
-      alert(`${importedCount} contatos importados com sucesso!`);
     };
-    reader.readAsText(file);
+    reader.readAsArrayBuffer(file);
   };
 
   const handleDelete = async (id: string) => {
@@ -134,7 +164,7 @@ const Contacts = () => {
         type="file" 
         ref={fileInputRef} 
         onChange={handleFileChange} 
-        accept=".csv" 
+        accept=".csv, .xlsx" 
         className="hidden" 
       />
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
@@ -155,7 +185,7 @@ const Contacts = () => {
             className="bg-gradient-to-r from-neon-green-500 to-neon-cyan-500 text-white px-4 py-2 rounded-xl flex items-center gap-2 shadow-lg shadow-emerald-900/20 hover:scale-105 transition-transform"
           >
             <Upload size={18} />
-            Importar CSV
+            Importar Planilha (CSV/XLSX)
           </button>
         </div>
       </div>
@@ -186,6 +216,7 @@ const Contacts = () => {
               <tr>
                 <th className="px-6 py-4">Nome</th>
                 <th className="px-6 py-4">Telefone</th>
+                <th className="px-6 py-4">CPF</th>
                 <th className="px-6 py-4">Tags</th>
                 <th className="px-6 py-4">Status</th>
                 <th className="px-6 py-4 text-right">Ações</th>
@@ -203,6 +234,7 @@ const Contacts = () => {
                     </div>
                   </td>
                   <td className="px-6 py-4 text-gray-400 font-mono">{contact.phone}</td>
+                  <td className="px-6 py-4 text-gray-400 font-mono">{contact.cpf || '-'}</td>
                   <td className="px-6 py-4">
                     <div className="flex gap-2">
                       {contact.tags.map(tag => (
