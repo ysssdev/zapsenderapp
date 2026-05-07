@@ -23,7 +23,13 @@ const Contacts = () => {
       snapshot.forEach((doc) => {
         fetchedContacts.push({ id: doc.id, ...doc.data() });
       });
-      setContacts(fetchedContacts);
+      // Sort contacts by phone number numerically
+      const sortedContacts = [...fetchedContacts].sort((a, b) => {
+        const phoneA = String(a.phone || '').replace(/\D/g, '');
+        const phoneB = String(b.phone || '').replace(/\D/g, '');
+        return phoneA.localeCompare(phoneB, undefined, { numeric: true });
+      });
+      setContacts(sortedContacts);
     }, (error) => {
       console.error("Error fetching contacts:", error);
     });
@@ -98,16 +104,23 @@ const Contacts = () => {
         const hasHeaders = headerRow.some((h: string) => h.includes('nome') || h.includes('name') || h === 'numero' || h.includes('cpf'));
         const startIndex = hasHeaders ? 1 : 0;
 
+        const contactsToImport: any[] = [];
+
         for (let i = startIndex; i < rows.length; i++) {
           const row = rows[i];
           if (!row || row.length === 0) continue;
 
-          const name = row[nameIdx] ? String(row[nameIdx]).trim() : '';
+          let name = row[nameIdx] ? String(row[nameIdx]).trim() : '';
           const phone = row[phoneIdx] ? String(row[phoneIdx]).trim() : '';
           const cpf = row[cpfIdx] ? String(row[cpfIdx]).trim() : '';
           const tagsStr = row[tagsIdx] ? String(row[tagsIdx]).trim() : '';
           
           let tags = tagsStr ? tagsStr.split(';').map(t => t.trim()) : [];
+
+          // If name is missing but phone exists, use phone as name
+          if (!name && phone) {
+            name = phone;
+          }
 
           // Sometimes CPF might be in the tags column if it's a legacy CSV format, handling that edge case:
           let finalCpf = cpf;
@@ -116,21 +129,32 @@ const Contacts = () => {
              tags = [];
           }
 
-          if (name && phone) {
-            try {
-              await addDoc(collection(db, 'contacts'), {
-                userId: user.uid,
-                name,
-                phone,
-                cpf: finalCpf,
-                tags,
-                status: 'VALID',
-                createdAt: new Date().toISOString()
-              });
-              importedCount++;
-            } catch (error) {
-              console.error("Error adding contact:", error);
-            }
+          if (phone) {
+            contactsToImport.push({
+              userId: user.uid,
+              name,
+              phone,
+              cpf: finalCpf,
+              tags,
+              status: 'VALID',
+              createdAt: new Date().toISOString()
+            });
+          }
+        }
+
+        // Sort contactsToImport numerically by phone before saving
+        contactsToImport.sort((a, b) => {
+          const phoneA = String(a.phone).replace(/\D/g, '');
+          const phoneB = String(b.phone).replace(/\D/g, '');
+          return phoneA.localeCompare(phoneB, undefined, { numeric: true });
+        });
+
+        for (const contactData of contactsToImport) {
+          try {
+            await addDoc(collection(db, 'contacts'), contactData);
+            importedCount++;
+          } catch (error) {
+            console.error("Error adding contact:", error);
           }
         }
         
