@@ -3,7 +3,7 @@ import { Play, Pause, Trash2, Edit3, Calendar, Plus, Clock, Users, X, Save, Smar
 import { Campaign, CampaignStatus, Instance } from '../types';
 import { useSearchParams } from 'react-router-dom';
 import { db } from '../firebase';
-import { collection, addDoc, updateDoc, deleteDoc, doc, onSnapshot, query, where, orderBy, getDocs, setDoc } from 'firebase/firestore';
+import { collection, addDoc, updateDoc, deleteDoc, doc, onSnapshot, query, where, orderBy, getDocs, setDoc, deleteField } from 'firebase/firestore';
 import { useAuth } from '../context/AuthContext';
 
 const Campaigns = () => {
@@ -241,18 +241,31 @@ const Campaigns = () => {
     if (!user) return;
 
     try {
+      // Format scheduledFor to ISO string if provided
+      let formattedScheduledFor: string | null = null;
+      if (scheduledFor) {
+        try {
+          formattedScheduledFor = new Date(scheduledFor).toISOString();
+        } catch (e) {
+          console.error("Invalid date:", scheduledFor);
+          return alert("Data de agendamento inválida.");
+        }
+      }
+
       if (editingId) {
         // Update existing
         const updateData: any = {
           name,
           message,
-          status: scheduledFor ? 'SCHEDULED' : 'DRAFT'
+          status: formattedScheduledFor ? 'SCHEDULED' : 'DRAFT'
         };
-        if (scheduledFor) {
-          updateData.scheduledFor = scheduledFor;
+        
+        if (formattedScheduledFor) {
+          updateData.scheduledFor = formattedScheduledFor;
         } else {
-          // If clearing scheduledFor, we could delete it, but simplest is to just omit or use deleteField(). We'll just update status to DRAFT.
+          updateData.scheduledFor = deleteField();
         }
+        
         await updateDoc(doc(db, 'campaigns', editingId), updateData);
       } else {
         // Create new
@@ -263,22 +276,24 @@ const Campaigns = () => {
           name,
           message,
           createdAt: new Date().toISOString(),
-          status: scheduledFor ? 'SCHEDULED' : 'DRAFT',
+          status: formattedScheduledFor ? 'SCHEDULED' : 'DRAFT',
           total: 0,
           sent: 0,
           failed: 0,
           progress: 0,
           tags: []
         };
-        if (scheduledFor) {
-          newData.scheduledFor = scheduledFor;
+        
+        if (formattedScheduledFor) {
+          newData.scheduledFor = formattedScheduledFor;
         }
+        
         await setDoc(newDocRef, newData);
       }
       closeEditor();
     } catch (error) {
       console.error("Error saving campaign:", error);
-      alert("Erro ao salvar campanha.");
+      alert("Erro ao salvar campanha. Verifique sua conexão e tente novamente.");
     }
   };
 
