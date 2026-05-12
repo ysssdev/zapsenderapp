@@ -14,6 +14,7 @@ import Cloacker from './components/Cloacker';
 import LandingPage from './components/LandingPage';
 import Templates from './components/Templates';
 import AdminTemplates from './components/AdminTemplates';
+import MentoradosNeto from './components/MentoradosNeto';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { ThemeProvider } from './context/ThemeContext';
 
@@ -60,6 +61,7 @@ const AppRoutes = () => {
         <Route path="billing" element={<Billing />} />
         <Route path="admin" element={<AdminPanel />} />
         <Route path="admin-templates" element={<AdminTemplates />} />
+        <Route path="mentorados-neto" element={<MentoradosNeto />} />
       </Route>
       
       <Route path="*" element={<Navigate to="/" replace />} />
