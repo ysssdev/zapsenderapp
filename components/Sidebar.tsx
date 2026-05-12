@@ -17,7 +17,8 @@ import {
   ShieldCheck,
   MessageSquare,
   Shield,
-  GraduationCap
+  GraduationCap,
+  Database
 } from 'lucide-react';
 
 interface SidebarProps {
@@ -45,6 +46,7 @@ const Sidebar = ({ isCollapsed, setIsCollapsed }: SidebarProps) => {
     { icon: FileText, label: 'Templates', path: '/app/templates' },
     { icon: CreditCard, label: 'Planos & Créditos', path: '/app/billing' },
     { icon: GraduationCap, label: 'Mentorados Neto', path: '/app/mentorados-neto' },
+    { icon: Database, label: 'APIs', path: '/app/apis' },
   ];
 
   const { user } = useAuth();

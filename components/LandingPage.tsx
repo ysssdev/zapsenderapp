@@ -1,6 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Zap, MessageSquare, Users, BarChart3, ArrowRight, CheckCircle2, Smartphone } from 'lucide-react';
+import { Zap, MessageSquare, Users, BarChart3, ArrowRight, CheckCircle2, Smartphone, ShieldCheck } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
 const LandingPage = () => {
@@ -74,14 +74,14 @@ const LandingPage = () => {
         </div>
 
         <h1 className="font-display text-5xl md:text-7xl font-bold text-white tracking-tight leading-[1.1] max-w-4xl mb-6">
-          Automação de WhatsApp <br />
+          Disparos, APIs, Operação Gringa e Cloacker <br />
           <span className="text-transparent bg-clip-text bg-gradient-to-r from-neon-green via-neon-cyan to-neon-purple neon-text">
-            Elevada ao Máximo.
+            Tudo em Um Só Lugar.
           </span>
         </h1>
         
         <p className="text-lg md:text-xl text-gray-400 max-w-2xl mb-10 leading-relaxed">
-          Escale suas vendas, extraia leads de grupos e envie campanhas em massa com a plataforma mais tecnológica e segura do mercado.
+          O principal hub para vendas online: Escale disparos de WhatsApp, opere internacionalmente, acesse APIs exclusivas e proteja-se com nosso Cloacker Avançado.
         </p>
 
         <div className="flex flex-col sm:flex-row items-center gap-4">
@@ -124,18 +124,18 @@ const LandingPage = () => {
 
       {/* Features Section */}
       <section id="features" className="py-24 px-4 relative">
-        <div className="max-w-6xl mx-auto">
+        <div className="max-w-7xl mx-auto">
           <div className="text-center mb-16">
              <h2 className="font-display text-3xl md:text-5xl font-bold text-white mb-4">Poder Absoluto.</h2>
-             <p className="text-gray-400 max-w-2xl mx-auto">Tudo que você precisa para dominar o WhatsApp Marketing em uma única interface futurista.</p>
+             <p className="text-gray-400 max-w-2xl mx-auto">Tudo que você precisa em uma única interface futurista. Sistema de disparos, operação gringa, APIs e muito mais.</p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             <div className="glass-panel p-8 rounded-3xl hover:border-neon-cyan/50 transition-colors group">
               <div className="w-14 h-14 rounded-2xl bg-neon-cyan/10 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
                 <MessageSquare size={28} className="text-neon-cyan" />
               </div>
-              <h3 className="text-xl font-bold text-white mb-3">Disparos em Massa</h3>
+              <h3 className="text-xl font-bold text-white mb-3">Sistema de Disparos</h3>
               <p className="text-gray-400 text-sm leading-relaxed">Envie milhares de mensagens com delay inteligente, variáveis personalizadas e simulação de digitação para evitar bloqueios.</p>
             </div>
 
@@ -143,16 +143,24 @@ const LandingPage = () => {
               <div className="w-14 h-14 rounded-2xl bg-neon-purple/10 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
                 <Users size={28} className="text-neon-purple" />
               </div>
-              <h3 className="text-xl font-bold text-white mb-3">Extrator de Grupos</h3>
-              <p className="text-gray-400 text-sm leading-relaxed">Capture leads altamente qualificados dos seus grupos com um clique e salve diretamente no seu CRM integrado.</p>
+              <h3 className="text-xl font-bold text-white mb-3">Operação Gringa</h3>
+              <p className="text-gray-400 text-sm leading-relaxed">Ferramentas exclusivas para operações internacionais, ferramentas avançadas como Auto Admin e Mentorados Neto.</p>
             </div>
 
             <div className="glass-panel p-8 rounded-3xl hover:border-neon-green/50 transition-colors group">
               <div className="w-14 h-14 rounded-2xl bg-neon-green/10 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
-                <Smartphone size={28} className="text-neon-green" />
+                <BarChart3 size={28} className="text-neon-green" />
               </div>
-              <h3 className="text-xl font-bold text-white mb-3">Multi-Instâncias</h3>
-              <p className="text-gray-400 text-sm leading-relaxed">Conecte múltiplos números de WhatsApp simultaneamente via QR Code ou API Oficial da Meta.</p>
+              <h3 className="text-xl font-bold text-white mb-3">APIs Integradas</h3>
+              <p className="text-gray-400 text-sm leading-relaxed">Consultas avançadas via API de CPF, CNPJ, Placas, Bancos (XP, Santander, Caixa, Safra) e Serasa Score diretamente no painel.</p>
+            </div>
+
+            <div className="glass-panel p-8 rounded-3xl hover:border-red-500/50 transition-colors group">
+              <div className="w-14 h-14 rounded-2xl bg-red-500/10 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                <ShieldCheck size={28} className="text-red-500" />
+              </div>
+              <h3 className="text-xl font-bold text-white mb-3">Cloacker Avançado</h3>
+              <p className="text-gray-400 text-sm leading-relaxed">Proteja seus links e campanhas de bloqueios indesejados, ocultando sua landing page original de bots e revisores das plataformas.</p>
             </div>
           </div>
         </div>
