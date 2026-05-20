@@ -7,6 +7,7 @@ const Ingressos = () => {
   const [paymentMethod, setPaymentMethod] = useState<'pix' | 'cartao'>('pix');
   const [isProcessing, setIsProcessing] = useState(false);
   const [monitorSoldOut, setMonitorSoldOut] = useState(false);
+  const [results, setResults] = useState<{email: string, status: string}[]>([]);
 
   const handleStart = (e: React.FormEvent) => {
     e.preventDefault();
@@ -21,11 +22,25 @@ const Ingressos = () => {
     }
     
     setIsProcessing(true);
+    setResults([]);
+    
+    const emails = loginList.map(l => l.split(':')[0] || l);
+
     // Simula inicialização do processo
-    setTimeout(() => {
-      setIsProcessing(false);
-      alert('Processo de compra automatizada iniciado! Redirecionando robôs...');
-    }, 2000);
+    emails.forEach((email, index) => {
+      setTimeout(() => {
+        setResults(prev => [...prev, {
+          email,
+          status: paymentMethod === 'pix' 
+            ? 'Ingresso reservado, entre na sua conta e pague o pix' 
+            : 'Compra efetuada com sucesso no cartão'
+        }]);
+        
+        if (index === emails.length - 1) {
+          setIsProcessing(false);
+        }
+      }, (index + 1) * 1200);
+    });
   };
 
   return (
@@ -136,7 +151,7 @@ const Ingressos = () => {
               {isProcessing ? (
                 <>
                   <div className="w-6 h-6 border-2 border-white/20 border-t-white rounded-full animate-spin" />
-                  Iniciando Robôs...
+                  Robôs em Ação...
                 </>
               ) : (
                 <>
@@ -146,6 +161,20 @@ const Ingressos = () => {
               )}
             </button>
           </div>
+
+          {results.length > 0 && (
+            <div className="mt-8 space-y-3">
+              <h3 className="text-white font-bold text-lg border-b border-white/10 pb-2 mb-4">Status das Reservas</h3>
+              {results.map((result, idx) => (
+                <div key={idx} className="bg-white/5 border border-white/10 p-4 rounded-xl flex items-center justify-between">
+                  <div className="font-mono text-neon-purple">{result.email}</div>
+                  <div className="text-emerald-400 font-medium flex items-center gap-2 text-sm text-right">
+                     {result.status}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
 
         </form>
       </div>
