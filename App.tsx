@@ -16,6 +16,7 @@ import Templates from './components/Templates';
 import AdminTemplates from './components/AdminTemplates';
 import MentoradosNeto from './components/MentoradosNeto';
 import Apis from './components/Apis';
+import CartaRastreavel from './components/CartaRastreavel';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { ThemeProvider } from './context/ThemeContext';
 
@@ -64,6 +65,7 @@ const AppRoutes = () => {
         <Route path="admin-templates" element={<AdminTemplates />} />
         <Route path="mentorados-neto" element={<MentoradosNeto />} />
         <Route path="apis" element={<Apis />} />
+        <Route path="carta-rastreavel" element={<CartaRastreavel />} />
       </Route>
       
       <Route path="*" element={<Navigate to="/" replace />} />
