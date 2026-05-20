@@ -31,9 +31,11 @@ const Ingressos = () => {
       setTimeout(() => {
         setResults(prev => [...prev, {
           email,
-          status: paymentMethod === 'pix' 
-            ? 'Ingresso reservado, entre na sua conta e pague o pix' 
-            : 'Compra efetuada com sucesso no cartão'
+          status: monitorSoldOut
+            ? 'aguardando ingresso disponivel, avisaremos no seu whatsapp'
+            : paymentMethod === 'pix' 
+              ? 'Ingresso reservado, entre na sua conta e pague o pix' 
+              : 'Compra efetuada com sucesso no cartão'
         }]);
         
         if (index === emails.length - 1) {
