@@ -9,7 +9,7 @@ const MentoradosNeto = () => {
   const options = [
     { title: 'Payments D7', desc: 'Opção de pagamento' },
     { title: 'Payments D3', desc: 'Opção de pagamento' },
-    { title: 'Payments D2', desc: 'Opção de pagamento' },
+    { title: 'Payments D5', desc: 'Opção de pagamento' },
   ];
 
   return (

@@ -7,6 +7,8 @@ const Ingressos = () => {
   const [paymentMethod, setPaymentMethod] = useState<'pix' | 'cartao'>('pix');
   const [isProcessing, setIsProcessing] = useState(false);
   const [monitorSoldOut, setMonitorSoldOut] = useState(false);
+  const [whatsappNumber, setWhatsappNumber] = useState('');
+  const [isWhatsappLinked, setIsWhatsappLinked] = useState(false);
   const [results, setResults] = useState<{email: string, status: string}[]>([]);
 
   const handleStart = (e: React.FormEvent) => {
@@ -139,6 +141,38 @@ const Ingressos = () => {
               <div className="w-11 h-6 bg-gray-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-neon-purple"></div>
             </label>
           </div>
+
+          {monitorSoldOut && (
+            <div className="bg-white/5 border border-white/10 rounded-xl p-5 -mt-4 animate-in fade-in slide-in-from-top-4">
+              <label className="block text-sm font-medium text-gray-400 mb-2">Adicionar WhatsApp (para avisos)</label>
+              <div className="flex gap-4 items-center">
+                <input
+                  type="text"
+                  placeholder="(11) 99999-9999"
+                  value={whatsappNumber}
+                  onChange={(e) => setWhatsappNumber(e.target.value)}
+                  disabled={isWhatsappLinked}
+                  className="bg-[#0a0a0a] border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-neon-purple transition-colors flex-1"
+                />
+                {!isWhatsappLinked ? (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if(whatsappNumber.replace(/\D/g, '').length >= 10) setIsWhatsappLinked(true)
+                      else alert('Por favor, insira um número válido com DDD.');
+                    }}
+                    className="bg-emerald-500/10 text-emerald-400 border border-emerald-500/50 px-6 py-3 rounded-xl font-bold hover:bg-emerald-500/20 transition-all whitespace-nowrap"
+                  >
+                    Vincular WhatsApp
+                  </button>
+                ) : (
+                  <div className="text-emerald-400 font-bold px-6 py-3 rounded-xl border border-emerald-500/50 bg-emerald-500/10 flex items-center justify-center whitespace-nowrap">
+                    Número vinculado
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
 
           <div className="pt-6 border-t border-white/5">
             <button
