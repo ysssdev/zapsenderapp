@@ -10,7 +10,7 @@ const CartaRastreavel = () => {
   });
 
   const handleRedirect = () => {
-    window.open('https://discord.gg/uc7ywPR4', '_blank');
+    window.open('https://discord.gg/wucdeaMt', '_blank');
   };
 
   const handleGenerate = (e: React.FormEvent) => {
