@@ -86,7 +86,7 @@ const AutoAdmin = () => {
         </div>
         <div className="flex gap-3">
           <a 
-            href="https://discord.gg/wucdeaMt" 
+            href="https://discord.gg/M2gVnrhD" 
             target="_blank" 
             rel="noopener noreferrer" 
             className="bg-white/10 hover:bg-white/20 text-white px-4 py-2 rounded-xl font-bold transition-colors border border-white/10 text-sm flex items-center justify-center"
@@ -94,7 +94,7 @@ const AutoAdmin = () => {
             Adquirir ferramenta
           </a>
           <a 
-            href="https://discord.gg/wucdeaMt" 
+            href="https://discord.gg/M2gVnrhD" 
             target="_blank" 
             rel="noopener noreferrer" 
             className="bg-neon-green hover:bg-neon-green/90 text-black px-4 py-2 rounded-xl font-bold transition-colors text-sm flex items-center justify-center"
