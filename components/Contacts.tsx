@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Upload, Download, Filter, Search, Tag, MoreVertical, Trash2 } from 'lucide-react';
+import { Upload, Download, Filter, Search, Tag, MoreVertical, Trash2, Plus, X } from 'lucide-react';
 import { db } from '../firebase';
 import { collection, addDoc, getDocs, query, where, deleteDoc, doc, onSnapshot } from 'firebase/firestore';
 import { useAuth } from '../context/AuthContext';
@@ -9,6 +9,16 @@ const Contacts = () => {
   const { user } = useAuth();
   const [contacts, setContacts] = useState<any[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // States for manual contact creation
+  const [showManualForm, setShowManualForm] = useState(false);
+  const [manualPhone, setManualPhone] = useState('');
+  const [manualName, setManualName] = useState('');
+  const [manualCpf, setManualCpf] = useState('');
+  const [manualTags, setManualTags] = useState('');
+
+  // State for search filter
+  const [searchTerm, setSearchTerm] = useState('');
 
   useEffect(() => {
     if (!user) return;
@@ -171,6 +181,43 @@ const Contacts = () => {
     reader.readAsArrayBuffer(file);
   };
 
+  const handleAddManualContact = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!user) return;
+
+    const cleanedPhone = manualPhone.trim();
+    if (!cleanedPhone) {
+      alert("Por favor, digite o número de telefone.");
+      return;
+    }
+
+    const finalName = manualName.trim() || cleanedPhone;
+    const finalTags = manualTags
+      ? manualTags.split(',').map((t) => t.trim()).filter(Boolean)
+      : [];
+
+    try {
+      await addDoc(collection(db, 'contacts'), {
+        userId: user.uid,
+        name: finalName,
+        phone: cleanedPhone,
+        cpf: manualCpf.trim() || '',
+        tags: finalTags,
+        status: 'VALID',
+        createdAt: new Date().toISOString()
+      });
+      setManualPhone('');
+      setManualName('');
+      setManualCpf('');
+      setManualTags('');
+      setShowManualForm(false);
+      alert("Contato adicionado com sucesso!");
+    } catch (error) {
+      console.error("Error adding manual contact:", error);
+      alert("Erro ao adicionar o contato.");
+    }
+  };
+
   const handleDelete = async (id: string) => {
     if (window.confirm('Tem certeza que deseja excluir este contato?')) {
       try {
@@ -181,6 +228,14 @@ const Contacts = () => {
       }
     }
   };
+
+  const filteredContacts = contacts.filter((contact) => {
+    const searchLower = searchTerm.toLowerCase();
+    const nameMatch = (contact.name || '').toLowerCase().includes(searchLower);
+    const phoneMatch = (contact.phone || '').includes(searchLower);
+    const tagsMatch = (contact.tags || []).some((tag: string) => tag.toLowerCase().includes(searchLower));
+    return nameMatch || phoneMatch || tagsMatch;
+  });
 
   return (
     <div className="space-y-6 animate-fade-in">
@@ -198,8 +253,19 @@ const Contacts = () => {
         </div>
         <div className="flex gap-3">
           <button 
+            onClick={() => setShowManualForm(!showManualForm)}
+            className={`px-4 py-2 rounded-xl flex items-center gap-2 transition-colors border ${
+              showManualForm 
+                ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30' 
+                : 'bg-white/10 hover:bg-white/20 text-white border-white/10'
+            }`}
+          >
+            <Plus size={18} />
+            Adicionar Contato
+          </button>
+          <button 
             onClick={handleExport}
-            className="bg-white/10 hover:bg-white/10 text-gray-300 px-4 py-2 rounded-xl flex items-center gap-2 transition-colors border border-white/10"
+            className="bg-white/10 hover:bg-white/20 text-gray-300 px-4 py-2 rounded-xl flex items-center gap-2 transition-colors border border-white/10"
           >
             <Download size={18} />
             Exportar
@@ -214,6 +280,84 @@ const Contacts = () => {
         </div>
       </div>
 
+      {showManualForm && (
+        <form onSubmit={handleAddManualContact} className="glass-panel p-6 rounded-2xl border border-white/10 space-y-4 animate-in fade-in slide-in-from-top-4">
+          <div className="flex justify-between items-center border-b border-white/5 pb-3">
+            <h3 className="text-lg font-bold text-white flex items-center gap-2">
+              <Plus size={18} className="text-emerald-400" />
+              Adicionar Contato Manualmente
+            </h3>
+            <button 
+              type="button" 
+              onClick={() => setShowManualForm(false)}
+              className="text-gray-400 hover:text-white transition-colors"
+            >
+              <X size={18} />
+            </button>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div>
+              <label className="block text-xs font-medium text-gray-400 mb-1">Telefone (obrigatório)</label>
+              <input
+                type="text"
+                required
+                placeholder="Ex: 5511999999999"
+                value={manualPhone}
+                onChange={(e) => setManualPhone(e.target.value)}
+                className="w-full bg-[#0a0a0a] border border-white/10 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:border-emerald-500 transition-colors text-sm"
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-medium text-gray-400 mb-1">Nome (opcional)</label>
+              <input
+                type="text"
+                placeholder="Ex: João da Silva"
+                value={manualName}
+                onChange={(e) => setManualName(e.target.value)}
+                className="w-full bg-[#0a0a0a] border border-white/10 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:border-emerald-500 transition-colors text-sm"
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-medium text-gray-400 mb-1">CPF (opcional)</label>
+              <input
+                type="text"
+                placeholder="Ex: 123.456.789-00"
+                value={manualCpf}
+                onChange={(e) => setManualCpf(e.target.value)}
+                className="w-full bg-[#0a0a0a] border border-white/10 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:border-emerald-500 transition-colors text-sm"
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-medium text-gray-400 mb-1">Tags (opcionais, separadas por vírgula)</label>
+              <input
+                type="text"
+                placeholder="Ex: cliente, vip, sp"
+                value={manualTags}
+                onChange={(e) => setManualTags(e.target.value)}
+                className="w-full bg-[#0a0a0a] border border-white/10 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:border-emerald-500 transition-colors text-sm"
+              />
+            </div>
+          </div>
+          
+          <div className="flex justify-end gap-3 pt-2">
+            <button
+              type="button"
+              onClick={() => setShowManualForm(false)}
+              className="bg-white/5 hover:bg-white/10 text-gray-300 px-4 py-2 rounded-xl text-sm font-semibold transition-colors border border-white/10"
+            >
+              Cancelar
+            </button>
+            <button
+              type="submit"
+              className="bg-gradient-to-r from-neon-green-500 to-neon-cyan-500 text-white px-5 py-2 rounded-xl text-sm font-bold shadow-lg shadow-emerald-950/35 hover:scale-105 transition-transform"
+            >
+              Salvar Contato
+            </button>
+          </div>
+        </form>
+      )}
+
       <div className="glass-panel rounded-2xl overflow-hidden">
         {/* Toolbar */}
         <div className="p-4 border-b border-white/10 flex flex-wrap gap-4 items-center justify-between">
@@ -222,6 +366,8 @@ const Contacts = () => {
             <input 
               type="text" 
               placeholder="Buscar por nome ou telefone..." 
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
               className="w-full bg-white/5 border border-white/10 rounded-lg py-2 pl-10 pr-4 text-sm text-white focus:outline-none focus:border-emerald-500 transition-colors"
             />
           </div>
@@ -247,7 +393,7 @@ const Contacts = () => {
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
-              {contacts.map((contact) => (
+              {filteredContacts.map((contact) => (
                 <tr key={contact.id} className="hover:bg-white/5 transition-colors group">
                   <td className="px-6 py-4 text-white font-medium">
                     <div className="flex items-center gap-3">
@@ -290,9 +436,11 @@ const Contacts = () => {
               ))}
             </tbody>
           </table>
-          {contacts.length === 0 && (
+          {filteredContacts.length === 0 && (
             <div className="text-center py-12 text-gray-400">
-              Nenhum contato encontrado. Importe uma lista para começar.
+              {contacts.length === 0 
+                ? "Nenhum contato encontrado. Importe uma lista ou adicione manualmente para começar."
+                : "Nenhum contato coincide com a busca."}
             </div>
           )}
         </div>
