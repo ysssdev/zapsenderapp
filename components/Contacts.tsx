@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Upload, Download, Filter, Search, Tag, MoreVertical, Trash2, Plus, X } from 'lucide-react';
 import { db } from '../firebase';
-import { collection, addDoc, getDocs, query, where, deleteDoc, doc, onSnapshot } from 'firebase/firestore';
+import { collection, addDoc, getDocs, query, where, deleteDoc, doc, onSnapshot, setDoc } from 'firebase/firestore';
 import { useAuth } from '../context/AuthContext';
 import * as XLSX from 'xlsx';
 
@@ -161,7 +161,11 @@ const Contacts = () => {
 
         for (const contactData of contactsToImport) {
           try {
-            await addDoc(collection(db, 'contacts'), contactData);
+            const newDocRef = doc(collection(db, 'contacts'));
+            await setDoc(newDocRef, {
+              id: newDocRef.id,
+              ...contactData
+            });
             importedCount++;
           } catch (error) {
             console.error("Error adding contact:", error);
@@ -197,7 +201,9 @@ const Contacts = () => {
       : [];
 
     try {
-      await addDoc(collection(db, 'contacts'), {
+      const newDocRef = doc(collection(db, 'contacts'));
+      await setDoc(newDocRef, {
+        id: newDocRef.id,
         userId: user.uid,
         name: finalName,
         phone: cleanedPhone,

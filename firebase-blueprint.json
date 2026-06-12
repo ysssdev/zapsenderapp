@@ -64,6 +64,10 @@
           "type": "string",
           "description": "The contact's phone number."
         },
+        "cpf": {
+          "type": "string",
+          "description": "The contact's CPF identification."
+        },
         "tags": {
           "type": "array",
           "items": {
@@ -71,13 +75,18 @@
           },
           "description": "Tags associated with the contact."
         },
+        "status": {
+          "type": "string",
+          "enum": ["VALID", "INVALID", "OPT_OUT"],
+          "description": "Determines the current validation status of the contact."
+        },
         "createdAt": {
           "type": "string",
           "format": "date-time",
           "description": "The timestamp when the contact was created."
         }
       },
-      "required": ["id", "userId", "name", "phone", "createdAt"]
+      "required": ["id", "userId", "name", "phone", "status", "createdAt"]
     },
     "Campaign": {
       "title": "Campaign",

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Users, Download, Search, CheckCircle2, Loader2, Smartphone, Save } from 'lucide-react';
 import { Instance } from '../types';
 import { db } from '../firebase';
-import { collection, addDoc } from 'firebase/firestore';
+import { collection, doc, setDoc } from 'firebase/firestore';
 import { useAuth } from '../context/AuthContext';
 
 const GroupExtractor = () => {
@@ -87,7 +87,9 @@ const GroupExtractor = () => {
     let savedCount = 0;
     for (const contact of extractedContacts) {
       try {
-        await addDoc(collection(db, 'contacts'), {
+        const newDocRef = doc(collection(db, 'contacts'));
+        await setDoc(newDocRef, {
+          id: newDocRef.id,
           userId: user.uid,
           name: contact.name,
           phone: contact.phone,
