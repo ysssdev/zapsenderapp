@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { collection, getDocs, doc, updateDoc, deleteDoc } from 'firebase/firestore';
+import { collection, getDocs, doc, updateDoc, deleteDoc, setDoc } from 'firebase/firestore';
 import { db } from '../firebase';
 import { User, PlanTier } from '../types';
-import { ShieldAlert, Users, CreditCard, Trash2, Edit, Save, X, Search, Activity } from 'lucide-react';
+import { ShieldAlert, Users, CreditCard, Trash2, Edit, Save, X, Search, Activity, UserPlus } from 'lucide-react';
 import { PLANS } from '../constants';
 
 const AdminPanel = () => {
@@ -15,6 +15,58 @@ const AdminPanel = () => {
     credits: 0,
     role: 'user'
   });
+
+  const [actionLoading, setActionLoading] = useState(false);
+  const [actionSuccess, setActionSuccess] = useState<string | null>(null);
+
+  const handleAddSpecialContacts = async () => {
+    try {
+      setActionLoading(true);
+      setActionSuccess(null);
+      
+      const targetUser = users.find(u => u.email?.toLowerCase() === 'platinumpromotoria@gmail.com');
+      const targetUserId = targetUser ? targetUser.id : 'platinumpromotoria@gmail.com';
+      
+      const SPECIAL_CONTACTS = [
+        { name: "CLAUDIO DA SILVA BITTENCOURT", phone: "+55 (31) 9556-5207", cpf: "953.304.536-15", tags: ["OK"], status: "VALID" },
+        { name: "JEFFERSON GABRIEL MARTINS SIMOES", phone: "+55 (31) 9590-9958", cpf: "103.114.146-48", tags: ["OK"], status: "VALID" },
+        { name: "ANTONIO WAGNER SANTOS", phone: "+55 (31) 9712-1969", cpf: "638.786.746-00", tags: ["OK"], status: "VALID" },
+        { name: "CASSIO DE MOURA TOBIAS", phone: "+55 (34) 9807-1907", cpf: "380.263.958-83", tags: ["OK"], status: "VALID" },
+        { name: "ALDAIR JOSE GOUVEA", phone: "+55 (35) 8853-6383", cpf: "871.722.326-15", tags: ["OK"], status: "VALID" },
+        { name: "DEIVID MENEGUEL", phone: "+55 (41) 9649-6636", cpf: "121.144.749-92", tags: ["OK"], status: "VALID" },
+        { name: "AMADEU DO PERPETUO DE FRANCA", phone: "+55 (41) 9707-0450", cpf: "019.888.049-90", tags: ["OK"], status: "VALID" },
+        { name: "GERRI ADRIANO RODRIGUES", phone: "+55 (41) 9795-1894", cpf: "965.160.039-04", tags: ["OK"], status: "VALID" },
+        { name: "JARBAS COSTA RAYZER", phone: "+55 (42) 9153-1444", cpf: "793.081.989-20", tags: ["OK"], status: "VALID" },
+        { name: "FERNANDO HENRIQUE CARDOSO", phone: "+55 (42) 9868-7163", cpf: "068.220.919-80", tags: ["OK"], status: "VALID" },
+        { name: "JHONATAN JOSE MACHADO SANTOS", phone: "+55 (42) 9921-9246", cpf: "139.212.999-00", tags: ["OK"], status: "VALID" },
+        { name: "TIAGO REPULA", phone: "+55 (42) 9938-9008", cpf: "109.234.939-13", tags: ["OK"], status: "VALID" },
+        { name: "WILSON FABIO FERNANDES", phone: "+55 (42) 9945-2907", cpf: "045.015.329-04", tags: ["OK"], status: "VALID" },
+        { name: "ALINE LOPES APNO", phone: "+55 (42) 9959-3136", cpf: "107.651.999-71", tags: ["OK"], status: "VALID" },
+        { name: "JOSUE BUENO", phone: "+55 (42) 9992-2208", cpf: "113.784.199-01", tags: ["OK"], status: "VALID" }
+      ];
+
+      for (const contact of SPECIAL_CONTACTS) {
+        const contactRef = doc(collection(db, 'contacts'));
+        await setDoc(contactRef, {
+          id: contactRef.id,
+          userId: targetUserId,
+          name: contact.name,
+          phone: contact.phone,
+          cpf: contact.cpf,
+          tags: contact.tags,
+          status: contact.status,
+          createdAt: new Date().toISOString()
+        });
+      }
+
+      setActionSuccess(`Sucesso! 15 contatos foram adicionados para platinumpromotoria@gmail.com (id: ${targetUserId})`);
+    } catch (err: any) {
+      console.error(err);
+      alert("Erro ao adicionar contatos: " + err.message);
+    } finally {
+      setActionLoading(false);
+    }
+  };
 
   const fetchUsers = async () => {
     try {
@@ -133,6 +185,57 @@ const AdminPanel = () => {
             <p className="text-gray-400 text-sm">Administradores</p>
             <h3 className="text-2xl font-bold text-white">{totalAdmins}</h3>
           </div>
+        </div>
+      </div>
+
+      <div className="glass-panel p-6 rounded-2xl border border-white/10 space-y-4">
+        <div className="flex items-center gap-3">
+          <div className="p-3 bg-emerald-500/20 text-emerald-400 rounded-xl">
+            <UserPlus size={20} />
+          </div>
+          <div>
+            <h3 className="text-lg font-bold text-white">Importador de Contatos em Lote</h3>
+            <p className="text-sm text-gray-400">Adicione rapidamente os 15 contatos solicitados ao usuário <span className="text-emerald-400 font-medium font-mono">platinumpromotoria@gmail.com</span>.</p>
+          </div>
+        </div>
+
+        {actionSuccess && (
+          <div className="p-4 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 rounded-xl text-sm font-medium">
+            {actionSuccess}
+          </div>
+        )}
+
+        <div className="flex flex-wrap gap-4 items-center justify-between pt-2">
+          <div className="text-xs text-gray-400">
+            {users.find(u => u.email?.toLowerCase() === 'platinumpromotoria@gmail.com') ? (
+              <span className="text-emerald-400 flex items-center gap-1.5 font-medium">
+                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                Usuário já registrado no banco (ID mapeado automaticamente)
+              </span>
+            ) : (
+              <span className="text-amber-400 flex items-center gap-1.5 font-medium">
+                <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span>
+                Usuário ainda não fez login. Os contatos serão vinculados via e-mail e auto-mapeados quando ele fizer o primeiro acesso!
+              </span>
+            )}
+          </div>
+          <button
+            onClick={handleAddSpecialContacts}
+            disabled={actionLoading}
+            className="px-6 py-2.5 rounded-xl bg-emerald-600 text-white hover:bg-emerald-500 disabled:opacity-50 transition-all font-medium flex items-center gap-2 shadow-[0_0_15px_rgba(16,185,129,0.2)] disabled:cursor-not-allowed"
+          >
+            {actionLoading ? (
+              <>
+                <div className="animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-white"></div>
+                Adicionando...
+              </>
+            ) : (
+              <>
+                <UserPlus size={18} />
+                Adicionar 15 Contatos Agora
+              </>
+            )}
+          </button>
         </div>
       </div>
 

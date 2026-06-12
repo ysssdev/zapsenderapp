@@ -10,7 +10,7 @@ import {
   createUserWithEmailAndPassword,
   User as FirebaseUser
 } from 'firebase/auth';
-import { doc, getDoc, setDoc } from 'firebase/firestore';
+import { doc, getDoc, setDoc, collection, query, where, getDocs, updateDoc } from 'firebase/firestore';
 
 enum OperationType {
   CREATE = 'create',
@@ -125,6 +125,25 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           return;
         }
         setUser(newUser);
+      }
+
+      // Check if there are any contacts uploaded with their email address as the userId fallback
+      if (firebaseUser.email) {
+        try {
+          const contactsRef = collection(db, 'contacts');
+          const q = query(contactsRef, where('userId', '==', firebaseUser.email));
+          const querySnapshot = await getDocs(q);
+          if (!querySnapshot.empty) {
+            console.log(`Mapping ${querySnapshot.size} contacts from fallback email ID to real UID: ${firebaseUser.uid}`);
+            for (const contactDoc of querySnapshot.docs) {
+              await updateDoc(doc(db, 'contacts', contactDoc.id), {
+                userId: firebaseUser.uid
+              });
+            }
+          }
+        } catch (e) {
+          console.error("Error migrating contacts:", e);
+        }
       }
     } catch (error) {
       console.error("Error syncing user with Firestore:", error);
