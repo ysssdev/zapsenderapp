@@ -17,6 +17,7 @@
     "firebase": "^12.11.0",
     "firebase-admin": "^13.8.0",
     "lucide-react": "^0.562.0",
+    "motion": "^12.40.0",
     "react": "^19.2.3",
     "react-dom": "^19.2.3",
     "react-router-dom": "^7.12.0",

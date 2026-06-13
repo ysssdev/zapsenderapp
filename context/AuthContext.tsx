@@ -71,6 +71,7 @@ interface AuthContextType {
   signupWithEmail: (e: string, p: string, n: string) => Promise<void>;
   logout: () => Promise<void>;
   loading: boolean;
+  updateProfile: (name: string, avatarUrl: string) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -211,6 +212,21 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
+  const updateProfile = async (name: string, avatarUrl: string) => {
+    if (!user) return;
+    const userRef = doc(db, 'users', user.id);
+    try {
+      const updatedData = {
+        name,
+        avatarUrl
+      };
+      await updateDoc(userRef, updatedData);
+      setUser(prev => prev ? { ...prev, ...updatedData } : null);
+    } catch (error) {
+      handleFirestoreError(error, OperationType.UPDATE, `users/${user.id}`);
+    }
+  };
+
   const logout = async () => {
     try {
       await signOut(auth);
@@ -227,7 +243,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       loginWithEmail,
       signupWithEmail,
       logout,
-      loading
+      loading,
+      updateProfile
     }}>
       {!loading && children}
     </AuthContext.Provider>
