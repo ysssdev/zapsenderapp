@@ -146,7 +146,7 @@ service cloud.firestore {
     }
 
     function isValidCampaign(data) {
-      let allowedFields = ['id', 'userId', 'name', 'message', 'scheduledFor', 'status', 'progress', 'sent', 'failed', 'total', 'createdAt', 'tags'];
+      let allowedFields = ['id', 'userId', 'name', 'message', 'scheduledFor', 'status', 'progress', 'sent', 'failed', 'total', 'createdAt', 'tags', 'mediaUrl', 'mediaType', 'mediaName'];
       return request.resource.data.keys().hasOnly(allowedFields) &&
              hasRequiredFields(['id', 'userId', 'name', 'message', 'status', 'progress', 'sent', 'failed', 'total', 'createdAt']) &&
              data.userId == request.auth.uid &&
@@ -154,6 +154,9 @@ service cloud.firestore {
              validStringLength('name', 1, 100) &&
              validStringLength('message', 1, 5000) &&
              (!( 'scheduledFor' in data ) || isValidDateString(data.scheduledFor)) &&
+             (!( 'mediaUrl' in data ) || data.mediaUrl is string) &&
+             (!( 'mediaType' in data ) || data.mediaType is string) &&
+             (!( 'mediaName' in data ) || data.mediaName is string) &&
              data.status in ['DRAFT', 'SCHEDULED', 'RUNNING', 'COMPLETED', 'PAUSED', 'FAILED'] &&
              data.progress is number && data.progress >= 0 && data.progress <= 100 &&
              isPositive('sent') &&

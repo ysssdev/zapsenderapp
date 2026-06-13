@@ -19,6 +19,7 @@ const Contacts = () => {
 
   // State for search filter
   const [searchTerm, setSearchTerm] = useState('');
+  const [isDeletingAll, setIsDeletingAll] = useState(false);
 
   useEffect(() => {
     if (!user) return;
@@ -235,6 +236,33 @@ const Contacts = () => {
     }
   };
 
+  const handleDeleteAll = async () => {
+    if (contacts.length === 0) {
+      alert("Não há contatos para excluir.");
+      return;
+    }
+
+    const count = contacts.length;
+    const isConfirmed = window.confirm(
+      `REGRA DE SEGURANÇA: Tem certeza absoluta que deseja excluir TODOS os ${count} contatos? \nEsta ação é irreversível e apagará toda a sua base de dados de contatos definitivamente!`
+    );
+
+    if (isConfirmed) {
+      try {
+        setIsDeletingAll(true);
+        // Exclude them from DB in batches or parallel
+        const promises = contacts.map((contact) => deleteDoc(doc(db, 'contacts', contact.id)));
+        await Promise.all(promises);
+        alert(`Todos os ${count} contatos foram excluídos com sucesso!`);
+      } catch (error) {
+        console.error("Error deleting all contacts:", error);
+        alert("Erro ao excluir todos os contatos. Verifique sua conexão e tente novamente.");
+      } finally {
+        setIsDeletingAll(false);
+      }
+    }
+  };
+
   const filteredContacts = contacts.filter((contact) => {
     const searchLower = searchTerm.toLowerCase();
     const nameMatch = (contact.name || '').toLowerCase().includes(searchLower);
@@ -283,6 +311,17 @@ const Contacts = () => {
             <Upload size={18} />
             Importar Planilha (CSV/XLSX)
           </button>
+          {contacts.length > 0 && (
+            <button 
+              type="button"
+              disabled={isDeletingAll}
+              onClick={handleDeleteAll}
+              className="bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 hover:text-rose-300 border border-rose-500/20 px-4 py-2 rounded-xl flex items-center gap-2 transition-all disabled:opacity-50 disabled:cursor-not-allowed text-sm font-semibold"
+            >
+              <Trash2 size={18} className={isDeletingAll ? "animate-pulse" : ""} />
+              {isDeletingAll ? "Excluindo..." : "Excluir Todos"}
+            </button>
+          )}
         </div>
       </div>
 

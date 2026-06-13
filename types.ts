@@ -38,6 +38,9 @@ export interface Campaign {
   failed: number;
   progress: number;
   tags?: string[];
+  mediaUrl?: string;
+  mediaType?: string;
+  mediaName?: string;
 }
 
 export interface Contact {

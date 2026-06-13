@@ -17,6 +17,47 @@ const PRESET_AVATARS = [
   { id: 'av6', url: 'https://images.unsplash.com/photo-1628157582853-a796fa650a6a?w=150&h=150&fit=crop&crop=faces', label: 'Tech 3D Abstract' },
 ];
 
+const resizeImage = (dataUrl: string, maxWidth = 192, maxHeight = 192): Promise<string> => {
+  return new Promise((resolve) => {
+    const img = new Image();
+    img.crossOrigin = 'anonymous';
+    img.onload = () => {
+      const canvas = document.createElement('canvas');
+      let width = img.width;
+      let height = img.height;
+
+      if (width > height) {
+        if (width > maxWidth) {
+          height = Math.round((height * maxWidth) / width);
+          width = maxWidth;
+        }
+      } else {
+        if (height > maxHeight) {
+          width = Math.round((width * maxHeight) / height);
+          height = maxHeight;
+        }
+      }
+
+      canvas.width = width;
+      canvas.height = height;
+
+      const ctx = canvas.getContext('2d');
+      if (ctx) {
+        ctx.fillStyle = '#000000';
+        ctx.fillRect(0, 0, width, height);
+        ctx.drawImage(img, 0, 0, width, height);
+        resolve(canvas.toDataURL('image/jpeg', 0.85));
+      } else {
+        resolve(dataUrl);
+      }
+    };
+    img.onerror = () => {
+      resolve(dataUrl);
+    };
+    img.src = dataUrl;
+  });
+};
+
 export const ProfileModal: React.FC<ProfileModalProps> = ({ isOpen, onClose }) => {
   const { user, updateProfile } = useAuth();
   const [name, setName] = useState(user?.name || '');
@@ -48,17 +89,22 @@ export const ProfileModal: React.FC<ProfileModalProps> = ({ isOpen, onClose }) =
       return;
     }
 
-    // Limit size to 1MB (as firestore document limit is 1MB and we inline base64)
-    if (file.size > 1024 * 1024) {
-      setError('A imagem é muito grande. Escolha uma imagem de até 1MB para melhor desempenho.');
+    if (file.size > 10 * 1024 * 1024) {
+      setError('A imagem é muito grande. Escolha uma imagem de até 10MB.');
       return;
     }
 
     const reader = new FileReader();
-    reader.onload = (event) => {
+    reader.onload = async (event) => {
       if (event.target?.result && typeof event.target.result === 'string') {
-        setAvatarUrl(event.target.result);
-        setError(null);
+        try {
+          const compressed = await resizeImage(event.target.result, 192, 192);
+          setAvatarUrl(compressed);
+          setError(null);
+        } catch (resizeErr) {
+          setAvatarUrl(event.target.result);
+          setError(null);
+        }
       }
     };
     reader.onerror = () => {

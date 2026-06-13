@@ -149,7 +149,7 @@ const TopBar: React.FC<TopBarProps> = ({ user, onToggleSidebar, showToggle, isSi
         </div>
       </div>
 
-      <ProfileModal isOpen={modalOpen} onClose={() => setModalOpen(false)} />
+      {modalOpen && <ProfileModal isOpen={modalOpen} onClose={() => setModalOpen(false)} />}
     </header>
   );
 };

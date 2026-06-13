@@ -43,6 +43,9 @@ interface QueueItem {
   delayMin: number;
   delayMax: number;
   instanceName: string;
+  mediaUrl?: string;
+  mediaType?: string;
+  mediaName?: string;
 }
 
 const queue: QueueItem[] = [];
@@ -71,29 +74,56 @@ async function processQueue() {
     
     let success = false;
     try {
-      // Call actual Evolution API
-      const response = await axios.post(
-        `${EVOLUTION_API_URL}/message/sendText/${item.instanceName}`,
-        {
-          number: item.contact.phone,
-          options: {
-            delay: 1200,
-            presence: "composing",
-            linkPreview: false
+      if (item.mediaUrl) {
+        console.log(`[Queue] Sending MEDIA message via sendMedia to ${item.contact.phone}`);
+        const response = await axios.post(
+          `${EVOLUTION_API_URL}/message/sendMedia/${item.instanceName}`,
+          {
+            number: item.contact.phone,
+            options: {
+              delay: 1200,
+              presence: "composing"
+            },
+            mediaMessage: {
+              mediatype: item.mediaType || "image",
+              fileName: item.mediaName || "arquivo",
+              caption: item.message,
+              media: item.mediaUrl
+            }
           },
-          textMessage: {
-            text: item.message
+          {
+            headers: {
+              'apikey': EVOLUTION_API_KEY,
+              'Content-Type': 'application/json'
+            }
           }
-        },
-        {
-          headers: {
-            'apikey': EVOLUTION_API_KEY,
-            'Content-Type': 'application/json'
+        );
+        console.log(`[Evolution API Media] Success:`, response.data);
+      } else {
+        // Call actual Evolution API SendText
+        const response = await axios.post(
+          `${EVOLUTION_API_URL}/message/sendText/${item.instanceName}`,
+          {
+            number: item.contact.phone,
+            options: {
+              delay: 1200,
+              presence: "composing",
+              linkPreview: false
+            },
+            textMessage: {
+              text: item.message
+            }
+          },
+          {
+            headers: {
+              'apikey': EVOLUTION_API_KEY,
+              'Content-Type': 'application/json'
+            }
           }
-        }
-      );
-      
-      console.log(`[Evolution API] Success:`, response.data);
+        );
+        
+        console.log(`[Evolution API Text] Success:`, response.data);
+      }
       success = true;
     } catch (error: any) {
       console.error(`[Evolution API] Error sending to ${item.contact.phone}:`, error.response?.data || error.message);
@@ -188,7 +218,7 @@ async function startServer() {
 
   // Start Campaign Endpoint
   app.post("/api/campaigns/start", async (req, res) => {
-    const { campaignId, contacts, message, delayMin, delayMax, instanceName } = req.body;
+    const { campaignId, contacts, message, delayMin, delayMax, instanceName, mediaUrl, mediaType, mediaName } = req.body;
     
     if (!campaignId || !contacts || !Array.isArray(contacts) || !instanceName) {
       return res.status(400).json({ error: 'Missing required fields (campaignId, contacts, instanceName)' });
@@ -211,7 +241,10 @@ async function startServer() {
         message: message || '',
         delayMin: delayMin || 10,
         delayMax: delayMax || 20,
-        instanceName
+        instanceName,
+        mediaUrl,
+        mediaType,
+        mediaName
       });
     });
 

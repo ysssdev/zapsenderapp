@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Play, Pause, Trash2, Edit3, Calendar, Plus, Clock, Users, X, Save, Smartphone } from 'lucide-react';
+import { Play, Pause, Trash2, Edit3, Calendar, Plus, Clock, Users, X, Save, Smartphone, Upload, Image as ImageIcon, FileText, Video } from 'lucide-react';
 import { Campaign, CampaignStatus, Instance } from '../types';
 import { useSearchParams } from 'react-router-dom';
 import { db } from '../firebase';
@@ -25,6 +25,14 @@ const Campaigns = () => {
   const [delayMax, setDelayMax] = useState(60);
   const [selectedInstance, setSelectedInstance] = useState<string>('');
   const [selectedTemplateId, setSelectedTemplateId] = useState<string>('');
+  
+  // Media attachments Form State
+  const [mediaUrl, setMediaUrl] = useState('');
+  const [mediaType, setMediaType] = useState('');
+  const [mediaName, setMediaName] = useState('');
+  const [dragActive, setDragActive] = useState(false);
+  const [fileError, setFileError] = useState<string | null>(null);
+  const fileInputRef = React.useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (!user) return;
@@ -130,6 +138,11 @@ const Campaigns = () => {
     setDelayMin(30);
     setDelayMax(60);
     setSelectedInstance('');
+    setSelectedTemplateId('');
+    setMediaUrl('');
+    setMediaType('');
+    setMediaName('');
+    setFileError(null);
   };
 
   const closeEditor = () => {
@@ -139,6 +152,75 @@ const Campaigns = () => {
 
   const insertVariable = (variable: string) => {
     setMessage(prev => prev + ` {{${variable}}} `);
+  };
+
+  const handleDrag = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (e.type === "dragenter" || e.type === "dragover") {
+      setDragActive(true);
+    } else if (e.type === "dragleave") {
+      setDragActive(false);
+    }
+  };
+
+  const processFile = (file: File) => {
+    if (!file) return;
+
+    // Size limit of 1MB (1024 * 1024 bytes)
+    if (file.size > 1024 * 1024) {
+      setFileError('O arquivo é muito grande. Escolha uma imagem/documento de até 1MB.');
+      return;
+    }
+
+    let detectedType = 'document';
+    if (file.type.startsWith('image/')) {
+      detectedType = 'image';
+    } else if (file.type.startsWith('video/')) {
+      detectedType = 'video';
+    } else if (file.type.startsWith('audio/')) {
+      detectedType = 'audio';
+    }
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      if (event.target?.result && typeof event.target.result === 'string') {
+        setMediaUrl(event.target.result);
+        setMediaType(detectedType);
+        setMediaName(file.name);
+        setFileError(null);
+      }
+    };
+    reader.onerror = () => {
+      setFileError('Ocorreu um erro ao carregar o arquivo.');
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setDragActive(false);
+
+    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+      processFile(e.dataTransfer.files[0]);
+    }
+  };
+
+  const handleFileInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      processFile(e.target.files[0]);
+    }
+  };
+
+  const handleRemoveFile = () => {
+    setMediaUrl('');
+    setMediaType('');
+    setMediaName('');
+    setFileError(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
   };
 
   // Actions
@@ -207,7 +289,10 @@ const Campaigns = () => {
               message: campaign.message,
               delayMin: 2, // Using small delays for testing
               delayMax: 5,
-              instanceName: instanceToUse
+              instanceName: instanceToUse,
+              mediaUrl: campaign.mediaUrl || '',
+              mediaType: campaign.mediaType || '',
+              mediaName: campaign.mediaName || ''
             })
           });
 
@@ -232,6 +317,10 @@ const Campaigns = () => {
     setName(campaign.name);
     setMessage(campaign.message);
     setScheduledFor(campaign.scheduledFor ? new Date(campaign.scheduledFor).toISOString().slice(0, 16) : '');
+    setMediaUrl(campaign.mediaUrl || '');
+    setMediaType(campaign.mediaType || '');
+    setMediaName(campaign.mediaName || '');
+    setFileError(null);
     setSearchParams({ create: 'true' });
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
@@ -265,6 +354,16 @@ const Campaigns = () => {
         } else {
           updateData.scheduledFor = deleteField();
         }
+
+        if (mediaUrl) {
+          updateData.mediaUrl = mediaUrl;
+          updateData.mediaType = mediaType;
+          updateData.mediaName = mediaName;
+        } else {
+          updateData.mediaUrl = deleteField();
+          updateData.mediaType = deleteField();
+          updateData.mediaName = deleteField();
+        }
         
         await updateDoc(doc(db, 'campaigns', editingId), updateData);
       } else {
@@ -286,6 +385,12 @@ const Campaigns = () => {
         
         if (formattedScheduledFor) {
           newData.scheduledFor = formattedScheduledFor;
+        }
+
+        if (mediaUrl) {
+          newData.mediaUrl = mediaUrl;
+          newData.mediaType = mediaType;
+          newData.mediaName = mediaName;
         }
         
         await setDoc(newDocRef, newData);
@@ -374,9 +479,69 @@ const Campaigns = () => {
 
               <div>
                 <label className="block text-sm font-medium text-gray-400 mb-2">Anexo (Opcional)</label>
-                <div className="border-2 border-dashed border-white/10 rounded-xl p-8 text-center hover:border-emerald-500/50 transition-colors cursor-pointer bg-white/5">
-                  <p className="text-gray-400 text-sm">Arraste uma imagem, vídeo ou PDF</p>
-                </div>
+                {fileError && (
+                  <div className="text-xs text-red-500 mb-2 font-medium">
+                    {fileError}
+                  </div>
+                )}
+                
+                {!mediaUrl ? (
+                  <div
+                    onDragEnter={handleDrag}
+                    onDragOver={handleDrag}
+                    onDragLeave={handleDrag}
+                    onDrop={handleDrop}
+                    onClick={() => fileInputRef.current?.click()}
+                    className={`border-2 border-dashed rounded-xl p-8 text-center transition-all cursor-pointer flex flex-col items-center justify-center gap-2 ${
+                      dragActive 
+                        ? 'border-emerald-500 bg-emerald-500/5 text-emerald-400 font-bold scale-[1.01]' 
+                        : 'border-white/10 hover:border-emerald-500/50 bg-white/5 hover:bg-white/10 text-gray-400 hover:text-gray-300'
+                    }`}
+                  >
+                    <Upload size={24} className={dragActive ? 'animate-bounce text-emerald-400' : 'text-gray-400'} />
+                    <p className="text-sm font-semibold">Arraste uma imagem, vídeo ou PDF ou clique para selecionar</p>
+                    <p className="text-xs text-gray-500">Tamanho máximo: 1MB para melhor desempenho</p>
+                    <input
+                      ref={fileInputRef}
+                      type="file"
+                      accept="image/*,video/*,application/pdf"
+                      onChange={handleFileInputChange}
+                      className="hidden"
+                    />
+                  </div>
+                ) : (
+                  <div className="bg-white/5 border border-white/10 p-4 rounded-xl flex items-center justify-between gap-4">
+                    <div className="flex items-center gap-3 overflow-hidden">
+                      {mediaType === 'image' && (
+                        <div className="w-12 h-12 rounded overflow-hidden border border-white/10 flex-shrink-0">
+                          <img src={mediaUrl} alt="Preview" className="w-full h-full object-cover" />
+                        </div>
+                      )}
+                      {mediaType === 'video' && (
+                        <div className="w-12 h-12 rounded bg-black flex items-center justify-center border border-white/10 flex-shrink-0">
+                          <Video size={20} className="text-gray-400" />
+                        </div>
+                      )}
+                      {mediaType === 'document' && (
+                        <div className="w-12 h-12 rounded bg-white/5 flex items-center justify-center border border-white/10 flex-shrink-0">
+                          <FileText size={20} className="text-amber-500" />
+                        </div>
+                      )}
+                      <div className="text-left overflow-hidden min-w-0">
+                        <p className="text-sm font-medium text-white truncate">{mediaName || 'arquivo'}</p>
+                        <p className="text-xs text-gray-400 capitalize">{mediaType}</p>
+                      </div>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={handleRemoveFile}
+                      className="p-1.5 hover:bg-white/10 text-gray-400 hover:text-rose-500 rounded-lg transition-colors flex-shrink-0"
+                      title="Remover anexo"
+                    >
+                      <X size={18} />
+                    </button>
+                  </div>
+                )}
               </div>
             </div>
 
@@ -423,11 +588,31 @@ const Campaigns = () => {
                   <div className="w-8 h-8 rounded-full bg-white/10" />
                   <div className="text-sm text-white font-medium">Sua Empresa</div>
                 </div>
-                <div className="flex-1 p-4 bg-[url('https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png')] bg-opacity-10 dark:opacity-5 opacity-80">
-                  {message && (
-                    <div className="bg-[#005c4b] text-white p-3 rounded-lg rounded-tr-none max-w-[85%] self-end ml-auto text-sm shadow-sm border border-transparent">
-                      {message.replace(/{{nome}}/g, 'João').replace(/{{empresa}}/g, 'ACME Ltda')}
-                      <div className="text-[10px] text-gray-300 text-right mt-1 flex items-center justify-end gap-1">
+                <div className="flex-1 p-4 bg-[url('https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png')] bg-opacity-10 dark:opacity-5 opacity-80 overflow-y-auto">
+                  {(message || mediaUrl) && (
+                    <div className="bg-[#005c4b] text-white p-3 rounded-lg rounded-tr-none max-w-[85%] self-end ml-auto text-sm shadow-sm border border-transparent flex flex-col gap-2">
+                      {mediaUrl && (
+                        <div className="rounded-md overflow-hidden bg-black/20 p-1 flex items-center justify-center max-h-40 min-h-16">
+                          {mediaType === 'image' && (
+                            <img src={mediaUrl} alt="Attached Preview" className="max-h-36 w-full object-cover rounded" />
+                          )}
+                          {mediaType === 'video' && (
+                            <video src={mediaUrl} className="max-h-36 w-full object-cover rounded text-xs" controls />
+                          )}
+                          {mediaType === 'document' && (
+                            <div className="flex items-center gap-2 p-2 bg-white/10 rounded w-full overflow-hidden">
+                              <FileText size={18} className="text-amber-500 flex-shrink-0" />
+                              <span className="text-xs truncate text-white">{mediaName || "documento.pdf"}</span>
+                            </div>
+                          )}
+                        </div>
+                      )}
+                      {message && (
+                        <p className="whitespace-pre-wrap">
+                          {message.replace(/{{nome}}/g, 'João').replace(/{{empresa}}/g, 'ACME Ltda')}
+                        </p>
+                      )}
+                      <div className="text-[10px] text-gray-300 text-right mt-0.5 flex items-center justify-end gap-1">
                         14:32 <span className="text-blue-400">✓✓</span>
                       </div>
                     </div>
