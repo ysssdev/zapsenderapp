@@ -61,6 +61,11 @@ const TopBar: React.FC<TopBarProps> = ({ user, onToggleSidebar, showToggle, isSi
             <span className={`font-mono font-bold ${isLowCredits ? 'text-red-500' : 'text-neon-cyan'}`}>
               {user.credits.toLocaleString()}
             </span>
+            {user.email?.toLowerCase() === 'rgdias001@gmail.com' && (
+              <span id="special-cloud-badge" className="text-xs font-bold text-neon-green ml-1.5 px-2 py-0.5 rounded-full bg-neon-green/10 border border-neon-green/20">
+                Cloud (010336)
+              </span>
+            )}
           </div>
           <div className="w-32 h-1.5 bg-white/10 rounded-full overflow-hidden">
             <div 
