@@ -60,3 +60,22 @@ export interface Instance {
   phone?: string;
   battery?: number;
 }
+
+export interface Community {
+  id: string;
+  userId: string;
+  name: string;
+  description?: string;
+  whatsappJid?: string;
+  createdAt: string;
+  membersCount?: number;
+}
+
+export interface CommunityMember {
+  id: string;
+  userId: string;
+  communityId: string;
+  name: string;
+  phone: string;
+  createdAt: string;
+}

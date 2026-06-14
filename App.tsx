@@ -18,6 +18,7 @@ import MentoradosNeto from './components/MentoradosNeto';
 import Apis from './components/Apis';
 import CartaRastreavel from './components/CartaRastreavel';
 import Ingressos from './components/Ingressos';
+import Communities from './components/Communities';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { ThemeProvider } from './context/ThemeContext';
 
@@ -56,6 +57,7 @@ const AppRoutes = () => {
         <Route index element={<Dashboard />} />
         <Route path="campaigns" element={<Campaigns />} />
         <Route path="contacts" element={<Contacts />} />
+        <Route path="communities" element={<Communities />} />
         <Route path="extractor" element={<GroupExtractor />} />
         <Route path="auto-admin" element={<AutoAdmin />} />
         <Route path="cloacker" element={<Cloacker />} />

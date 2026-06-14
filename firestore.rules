@@ -194,6 +194,31 @@ service cloud.firestore {
              isValidDateString(data.updatedAt);
     }
 
+    function isValidCommunity(data) {
+      let allowedFields = ['id', 'userId', 'name', 'description', 'whatsappJid', 'createdAt', 'membersCount'];
+      return request.resource.data.keys().hasOnly(allowedFields) &&
+             hasRequiredFields(['id', 'userId', 'name', 'createdAt']) &&
+             data.userId == request.auth.uid &&
+             validStringLength('id', 1, 100) &&
+             validStringLength('name', 1, 100) &&
+             isValidOptionalString('description', 0, 1000) &&
+             isValidOptionalString('whatsappJid', 0, 100) &&
+             (!( 'membersCount' in data ) || data.membersCount is number) &&
+             isValidDateString(data.createdAt);
+    }
+
+    function isValidCommunityMember(data) {
+      let allowedFields = ['id', 'userId', 'communityId', 'name', 'phone', 'createdAt'];
+      return request.resource.data.keys().hasOnly(allowedFields) &&
+             hasRequiredFields(['id', 'userId', 'communityId', 'name', 'phone', 'createdAt']) &&
+             data.userId == request.auth.uid &&
+             validStringLength('id', 1, 100) &&
+             validStringLength('communityId', 1, 100) &&
+             validStringLength('name', 1, 100) &&
+             validStringLength('phone', 1, 30) &&
+             isValidDateString(data.createdAt);
+    }
+
     // ===============================================================
     // Rules
     // ===============================================================
@@ -230,6 +255,20 @@ service cloud.firestore {
       allow read: if isDocOwner() || isAdmin();
       allow create: if (isAuthenticated() && isValidInstance(request.resource.data)) || isAdmin();
       allow update: if (isDocOwner() && isValidInstance(request.resource.data) && areImmutableFieldsUnchanged(['id', 'userId', 'createdAt', 'provider'])) || isAdmin();
+      allow delete: if isDocOwner() || isAdmin();
+    }
+
+    match /communities/{communityId} {
+      allow read: if isDocOwner() || isAdmin();
+      allow create: if (isAuthenticated() && isValidCommunity(request.resource.data)) || isAdmin();
+      allow update: if (isDocOwner() && isValidCommunity(request.resource.data) && areImmutableFieldsUnchanged(['id', 'userId', 'createdAt'])) || isAdmin();
+      allow delete: if isDocOwner() || isAdmin();
+    }
+
+    match /community_members/{memberId} {
+      allow read: if isDocOwner() || isAdmin();
+      allow create: if (isAuthenticated() && isValidCommunityMember(request.resource.data)) || isAdmin();
+      allow update: if (isDocOwner() && isValidCommunityMember(request.resource.data) && areImmutableFieldsUnchanged(['id', 'userId', 'communityId', 'createdAt'])) || isAdmin();
       allow delete: if isDocOwner() || isAdmin();
     }
   }
