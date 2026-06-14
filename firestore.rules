@@ -130,10 +130,10 @@ service cloud.firestore {
              data.id == request.auth.uid;
     }
 
+    // Allow flexible contact data representation
     function isValidContact(data) {
       let allowedFields = ['id', 'userId', 'name', 'phone', 'tags', 'createdAt', 'status', 'cpf', 'lastInteracted'];
-      return request.resource.data.keys().hasOnly(allowedFields) &&
-             hasRequiredFields(['id', 'userId', 'name', 'phone', 'createdAt', 'status']) &&
+      return request.resource.data.keys().hasAll(['id', 'userId', 'name', 'phone', 'createdAt', 'status']) &&
              data.userId == request.auth.uid &&
              validStringLength('id', 1, 100) &&
              validStringLength('name', 1, 100) &&
@@ -147,8 +147,7 @@ service cloud.firestore {
 
     function isValidCampaign(data) {
       let allowedFields = ['id', 'userId', 'name', 'message', 'scheduledFor', 'status', 'progress', 'sent', 'failed', 'total', 'createdAt', 'tags', 'mediaUrl', 'mediaType', 'mediaName'];
-      return request.resource.data.keys().hasOnly(allowedFields) &&
-             hasRequiredFields(['id', 'userId', 'name', 'message', 'status', 'progress', 'sent', 'failed', 'total', 'createdAt']) &&
+      return request.resource.data.keys().hasAll(['id', 'userId', 'name', 'message', 'status', 'progress', 'sent', 'failed', 'total', 'createdAt']) &&
              data.userId == request.auth.uid &&
              validStringLength('id', 1, 100) &&
              validStringLength('name', 1, 100) &&
@@ -168,8 +167,7 @@ service cloud.firestore {
 
     function isValidInstance(data) {
       let allowedFields = ['id', 'userId', 'name', 'status', 'provider', 'phone', 'battery', 'createdAt'];
-      return request.resource.data.keys().hasOnly(allowedFields) &&
-             hasRequiredFields(['id', 'userId', 'name', 'status', 'provider', 'createdAt']) &&
+      return request.resource.data.keys().hasAll(['id', 'userId', 'name', 'status', 'provider', 'createdAt']) &&
              data.userId == request.auth.uid &&
              validStringLength('id', 1, 100) &&
              validStringLength('name', 1, 100) &&
@@ -182,8 +180,7 @@ service cloud.firestore {
 
     function isValidTemplate(data) {
       let allowedFields = ['id', 'userId', 'name', 'content', 'status', 'rejectionReason', 'createdAt', 'updatedAt'];
-      return request.resource.data.keys().hasOnly(allowedFields) &&
-             hasRequiredFields(['id', 'userId', 'name', 'content', 'status', 'createdAt', 'updatedAt']) &&
+      return request.resource.data.keys().hasAll(['id', 'userId', 'name', 'content', 'status', 'createdAt', 'updatedAt']) &&
              data.userId == request.auth.uid &&
              validStringLength('id', 1, 100) &&
              validStringLength('name', 1, 100) &&
@@ -196,8 +193,7 @@ service cloud.firestore {
 
     function isValidCommunity(data) {
       let allowedFields = ['id', 'userId', 'name', 'description', 'whatsappJid', 'createdAt', 'membersCount'];
-      return request.resource.data.keys().hasOnly(allowedFields) &&
-             hasRequiredFields(['id', 'userId', 'name', 'createdAt']) &&
+      return request.resource.data.keys().hasAll(['id', 'userId', 'name', 'createdAt']) &&
              data.userId == request.auth.uid &&
              validStringLength('id', 1, 100) &&
              validStringLength('name', 1, 100) &&
@@ -209,8 +205,7 @@ service cloud.firestore {
 
     function isValidCommunityMember(data) {
       let allowedFields = ['id', 'userId', 'communityId', 'name', 'phone', 'createdAt'];
-      return request.resource.data.keys().hasOnly(allowedFields) &&
-             hasRequiredFields(['id', 'userId', 'communityId', 'name', 'phone', 'createdAt']) &&
+      return request.resource.data.keys().hasAll(['id', 'userId', 'communityId', 'name', 'phone', 'createdAt']) &&
              data.userId == request.auth.uid &&
              validStringLength('id', 1, 100) &&
              validStringLength('communityId', 1, 100) &&

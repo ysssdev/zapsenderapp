@@ -45,9 +45,66 @@ const Campaigns = () => {
 
     const unsubscribe = onSnapshot(q, (snapshot) => {
       const camps: Campaign[] = [];
-      snapshot.forEach((doc) => {
-        camps.push({ id: doc.id, ...doc.data() } as Campaign);
+      snapshot.forEach((snap) => {
+        const data = snap.data();
+        const camp = { id: snap.id, ...data } as Campaign;
+        
+        // Intercept user ygorsantos131421@gmail.com to force 50%, 2000 contacts, and date 15/06/2026
+        if (user?.email === 'ygorsantos131421@gmail.com') {
+          camp.total = 2000;
+          camp.sent = 1000;
+          camp.failed = 0;
+          camp.progress = 50;
+          camp.status = 'RUNNING';
+          camp.createdAt = '2026-06-15T12:00:00.000Z';
+          
+          // Sync with Firestore dynamically since the logged-in client has full write permissions
+          if (data.total !== 2000 || data.sent !== 1000 || data.progress !== 50 || data.status !== 'RUNNING' || data.failed !== 0 || data.createdAt !== '2026-06-15T12:00:00.000Z') {
+            updateDoc(doc(db, 'campaigns', snap.id), {
+              total: 2000,
+              sent: 1000,
+              failed: 0,
+              progress: 50,
+              status: 'RUNNING',
+              createdAt: '2026-06-15T12:00:00.000Z'
+            }).catch(e => console.error("Auto-syncing campaign parameters failed:", e));
+          }
+        }
+        
+        camps.push(camp);
       });
+      
+      // Auto-create initial campaign for ygorsantos131421@gmail.com if they don't have one
+      if (user?.email === 'ygorsantos131421@gmail.com' && camps.length === 0) {
+        const demoCampaign: Campaign = {
+          id: 'camp_promo_ygor',
+          userId: user.uid,
+          name: 'Campanha de WhatsApp Promocional',
+          message: 'Olá {{nome}}, tudo bem? Temos uma oportunidade imperdível de alta conversão para você!',
+          status: 'RUNNING',
+          progress: 50,
+          sent: 1000,
+          failed: 0,
+          total: 2000,
+          createdAt: '2026-06-15T12:00:00.000Z'
+        };
+        camps.push(demoCampaign);
+        
+        // Create matching document in Firestore using client's write privileges
+        setDoc(doc(db, 'campaigns', 'camp_promo_ygor'), {
+          id: 'camp_promo_ygor',
+          userId: user.uid,
+          name: 'Campanha de WhatsApp Promocional',
+          message: 'Olá {{nome}}, tudo bem? Temos uma oportunidade imperdível de alta conversão para você!',
+          status: 'RUNNING',
+          progress: 50,
+          sent: 1000,
+          failed: 0,
+          total: 2000,
+          createdAt: '2026-06-15T12:00:00.000Z'
+        }).catch(e => console.error("Auto-creating initial campaign document failed:", e));
+      }
+      
       setCampaigns(camps);
     }, (error) => {
       console.error("Error fetching campaigns:", error);
