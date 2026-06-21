@@ -3,7 +3,7 @@ import { ShoppingCart } from 'lucide-react';
 
 const MentoradosNeto = () => {
   const handleRedirect = () => {
-    window.open('https://discord.gg/3qywRMCT', '_blank');
+    window.open('https://discord.gg/fQDNYHeb', '_blank');
   };
 
   const options = [
