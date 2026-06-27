@@ -10,7 +10,7 @@ const TikTokAds = () => {
     {
       title: 'TikTok Restabelecida 1x',
       desc: 'Conta de anúncio TikTok Ads restabelecida de alto score. Pronta para anunciar de imediato com aquecimento prévio.',
-      price: 'R$ 149,90',
+      price: 'Consulte no Discord',
       badge: 'Popular',
       features: ['Conta verificada e restabelecida', 'Alta reputação (Trust Score)', 'Suporte pós-compra', 'Ideal para iniciantes'],
       type: 'restabelecida'
@@ -18,7 +18,7 @@ const TikTokAds = () => {
     {
       title: 'TikTok Restabelecida 2x',
       desc: 'Pacote com 2 contas de anúncio restabelecidas. Excelente redundância para suas campanhas de alta escala.',
-      price: 'R$ 279,90',
+      price: 'Consulte no Discord',
       badge: 'Melhor Custo-Benefício',
       features: ['Duas contas prontas para uso', 'Aquecimento estratégico individual', 'Suporte prioritário', 'Redundância contra bloqueios'],
       type: 'restabelecida'
@@ -26,7 +26,7 @@ const TikTokAds = () => {
     {
       title: 'TikTok Restabelecida 3x',
       desc: 'Super combo com 3 contas restabelecidas de alta resiliência. Estrutura completa de contingência para grandes operações.',
-      price: 'R$ 389,90',
+      price: 'Consulte no Discord',
       badge: 'Contingência Máxima',
       features: ['Três contas de alto escalonamento', 'Perfis aquecidos profissionalmente', 'Atendimento VIP', 'Blindagem completa contra contingências'],
       type: 'restabelecida'
@@ -34,7 +34,7 @@ const TikTokAds = () => {
     {
       title: 'TikTok BC 30',
       desc: 'Business Center TikTok Ads com limite diário de R$ 30k. Ideal para lançamentos e escalonamento controlado.',
-      price: 'R$ 249,90',
+      price: 'Consulte no Discord',
       badge: 'Escala Inicial',
       features: ['Business Center Verificado', 'Limite diário de até R$ 30.000', 'Compartilhamento de pixels', 'Conexão facilitada de novas contas'],
       type: 'bc'
@@ -42,7 +42,7 @@ const TikTokAds = () => {
     {
       title: 'TikTok BC 60',
       desc: 'Business Center TikTok Ads com limite diário de R$ 60k. Perfeito para agências e infoprodutores de médio porte.',
-      price: 'R$ 449,90',
+      price: 'Consulte no Discord',
       badge: 'Escala Avançada',
       features: ['Business Center de Alta Maturidade', 'Limite diário de até R$ 60.000', 'Acesso a recursos exclusivos', 'Compartilhamento estendido de ativos'],
       type: 'bc'
@@ -50,7 +50,7 @@ const TikTokAds = () => {
     {
       title: 'TikTok BC 90',
       desc: 'Business Center TikTok Ads de nível corporativo com limite diário de R$ 90k+. Máxima capacidade de tração.',
-      price: 'R$ 599,90',
+      price: 'Consulte no Discord',
       badge: 'Elite Operações',
       features: ['Business Center Corporativo VIP', 'Limite diário de até R$ 90.000 ou ilimitado', 'Suporte exclusivo e direto', 'Máxima imunidade a flutuações de plataforma'],
       type: 'bc'
@@ -124,8 +124,12 @@ const TikTokAds = () => {
             {/* Price & Buy Button */}
             <div className="mt-auto pt-4 border-t border-white/5">
               <div className="flex items-baseline justify-between mb-4">
-                <span className="text-xs text-gray-500 font-medium">Investimento</span>
-                <span className="text-2xl font-display font-extrabold text-white">{opt.price}</span>
+                <span className="text-xs text-gray-500 font-medium">Preço</span>
+                <span className={`text-base font-display font-extrabold tracking-tight ${
+                  opt.type === 'restabelecida' ? 'text-cyan-400' : 'text-pink-400'
+                }`}>
+                  {opt.price}
+                </span>
               </div>
               
               <button
@@ -137,7 +141,7 @@ const TikTokAds = () => {
                 }`}
               >
                 <ShoppingCart size={16} />
-                Comprar Agora
+                Comprar no Discord
               </button>
             </div>
           </div>
