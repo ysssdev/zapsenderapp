@@ -42,7 +42,7 @@ const CLOACKER_PLANS = [
 const Cloacker = () => {
   const handleRedirect = () => {
     // Redireciona para o link de suporte/checkout especificado nas tarefas anteriores
-    window.open('https://discord.gg/fQDNYHeb', '_blank');
+    window.open('https://discord.gg/VvDZj9wU', '_blank');
   };
 
   return (

@@ -21,7 +21,8 @@ import {
   GraduationCap,
   Database,
   Mail,
-  Ticket
+  Ticket,
+  Target
 } from 'lucide-react';
 
 interface SidebarProps {
@@ -53,6 +54,7 @@ const Sidebar = ({ isCollapsed, setIsCollapsed }: SidebarProps) => {
     { icon: Database, label: 'APIs', path: '/app/apis' },
     { icon: Mail, label: 'Carta Rastreável', path: '/app/carta-rastreavel' },
     { icon: Ticket, label: 'Ingressos', path: '/app/ingressos' },
+    { icon: Target, label: 'TikTok Ads', path: '/app/tiktok-ads' },
   ];
 
   const { user } = useAuth();
