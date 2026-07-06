@@ -3,7 +3,7 @@ import { Target, TrendingUp, ShieldAlert, Sparkles, ShoppingCart } from 'lucide-
 
 const TikTokAds = () => {
   const handleBuy = () => {
-    window.open('https://discord.gg/VvDZj9wU', '_blank');
+    window.open('https://discord.gg/VPW5SEWK', '_blank');
   };
 
   const options = [
