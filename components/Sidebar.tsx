@@ -22,7 +22,8 @@ import {
   Database,
   Mail,
   Ticket,
-  Target
+  Target,
+  Car
 } from 'lucide-react';
 
 interface SidebarProps {
@@ -55,6 +56,7 @@ const Sidebar = ({ isCollapsed, setIsCollapsed }: SidebarProps) => {
     { icon: Mail, label: 'Carta Rastreável', path: '/app/carta-rastreavel' },
     { icon: Ticket, label: 'Ingressos', path: '/app/ingressos' },
     { icon: Target, label: 'TikTok Ads', path: '/app/tiktok-ads' },
+    { icon: Car, label: 'Contas GringoApp', path: '/app/gringo-app' },
   ];
 
   const { user } = useAuth();
