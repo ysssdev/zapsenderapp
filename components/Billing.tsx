@@ -15,7 +15,7 @@ const Billing = () => {
   const selectedPackage = CREDIT_PACKAGES.find(p => p.id === selectedPackageId) || CREDIT_PACKAGES[1];
 
   const handleWhatsAppRedirect = (type: 'plan' | 'credits', details: any) => {
-    window.open(`https://discord.gg/NKDw4d3P`, '_blank');
+    window.open(`https://discord.gg/24RFe9nv`, '_blank');
   };
 
   return (

@@ -3,7 +3,7 @@ import { Database, Search, Shield, Car, Building2, Landmark } from 'lucide-react
 
 const Apis = () => {
   const handleRedirect = () => {
-    window.open('https://discord.gg/NKDw4d3P', '_blank');
+    window.open('https://discord.gg/24RFe9nv', '_blank');
   };
 
   const apis = [
