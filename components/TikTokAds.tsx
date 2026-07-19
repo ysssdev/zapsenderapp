@@ -54,6 +54,14 @@ const TikTokAds = () => {
       badge: 'Elite Operações',
       features: ['Business Center Corporativo VIP', 'Limite diário de até R$ 90.000 ou ilimitado', 'Suporte exclusivo e direto', 'Máxima imunidade a flutuações de plataforma'],
       type: 'bc'
+    },
+    {
+      title: 'Documentos Europa',
+      desc: 'Documentos europeus de alta qualidade para verificação e contingência em plataformas de anúncios.',
+      price: 'Consulte no Discord',
+      badge: 'Verificação',
+      features: ['Documentos completos e consistentes', 'Alta taxa de aprovação nas plataformas', 'Essencial para rodar contas europeias', 'Suporte e dicas de utilização'],
+      type: 'docs'
     }
   ];
 
@@ -77,7 +85,7 @@ const TikTokAds = () => {
           >
             {/* Visual background glow for TikTok theme */}
             <div className={`absolute -right-16 -top-16 w-32 h-32 rounded-full opacity-10 blur-3xl transition-all group-hover:scale-125 duration-500 ${
-              opt.type === 'restabelecida' ? 'bg-cyan-400' : 'bg-pink-500'
+              opt.type === 'restabelecida' ? 'bg-cyan-400' : opt.type === 'bc' ? 'bg-pink-500' : 'bg-purple-500'
             }`} />
 
             <div>
@@ -86,14 +94,18 @@ const TikTokAds = () => {
                 <span className={`text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-md ${
                   opt.type === 'restabelecida' 
                     ? 'bg-cyan-500/10 text-cyan-400 border border-cyan-500/20' 
-                    : 'bg-pink-500/10 text-pink-400 border border-pink-500/20'
+                    : opt.type === 'bc' 
+                    ? 'bg-pink-500/10 text-pink-400 border border-pink-500/20'
+                    : 'bg-purple-500/10 text-purple-400 border border-purple-500/20'
                 }`}>
                   {opt.badge}
                 </span>
                 {opt.type === 'restabelecida' ? (
                   <TrendingUp className="text-cyan-400 w-5 h-5 group-hover:translate-y-[-2px] transition-transform" />
-                ) : (
+                ) : opt.type === 'bc' ? (
                   <Target className="text-pink-400 w-5 h-5 group-hover:scale-110 transition-transform" />
+                ) : (
+                  <ShieldAlert className="text-purple-400 w-5 h-5 group-hover:scale-110 transition-transform" />
                 )}
               </div>
 
@@ -113,7 +125,7 @@ const TikTokAds = () => {
                 {opt.features.map((feat, fidx) => (
                   <li key={fidx} className="flex items-center gap-2 text-[11px] text-gray-300">
                     <span className={`w-1.5 h-1.5 rounded-full ${
-                      opt.type === 'restabelecida' ? 'bg-cyan-400' : 'bg-pink-400'
+                      opt.type === 'restabelecida' ? 'bg-cyan-400' : opt.type === 'bc' ? 'bg-pink-400' : 'bg-purple-400'
                     }`} />
                     {feat}
                   </li>
@@ -126,7 +138,7 @@ const TikTokAds = () => {
               <div className="flex items-baseline justify-between mb-4">
                 <span className="text-xs text-gray-500 font-medium">Preço</span>
                 <span className={`text-base font-display font-extrabold tracking-tight ${
-                  opt.type === 'restabelecida' ? 'text-cyan-400' : 'text-pink-400'
+                  opt.type === 'restabelecida' ? 'text-cyan-400' : opt.type === 'bc' ? 'text-pink-400' : 'text-purple-400'
                 }`}>
                   {opt.price}
                 </span>
@@ -137,7 +149,9 @@ const TikTokAds = () => {
                 className={`w-full font-bold py-3 px-4 rounded-xl transition-all flex items-center justify-center gap-2 border text-sm ${
                   opt.type === 'restabelecida'
                     ? 'bg-cyan-500 text-black border-transparent hover:bg-cyan-400 hover:shadow-[0_0_15px_rgba(6,182,212,0.4)]'
-                    : 'bg-pink-500 text-white border-transparent hover:bg-pink-400 hover:shadow-[0_0_15px_rgba(236,72,153,0.4)]'
+                    : opt.type === 'bc'
+                    ? 'bg-pink-500 text-white border-transparent hover:bg-pink-400 hover:shadow-[0_0_15px_rgba(236,72,153,0.4)]'
+                    : 'bg-purple-500 text-white border-transparent hover:bg-purple-400 hover:shadow-[0_0_15px_rgba(168,85,247,0.4)]'
                 }`}
               >
                 <ShoppingCart size={16} />
