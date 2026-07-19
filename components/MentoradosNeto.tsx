@@ -10,6 +10,7 @@ const MentoradosNeto = () => {
     { title: 'Payments D7', desc: 'Opção de pagamento' },
     { title: 'Payments D3', desc: 'Opção de pagamento' },
     { title: 'Payments D5', desc: 'Opção de pagamento' },
+    { title: 'Conta Stripe Reino Unido', desc: 'Conta Stripe registrada no Reino Unido para processamento.' },
   ];
 
   return (
@@ -19,7 +20,7 @@ const MentoradosNeto = () => {
         <p className="text-gray-400 text-sm mt-1">Opções de pagamento para mentorados.</p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
         {options.map((opt, idx) => (
           <div key={idx} className="glass-panel p-6 rounded-2xl flex flex-col items-center text-center">
             <h3 className="text-xl font-bold text-white mb-2">{opt.title}</h3>
