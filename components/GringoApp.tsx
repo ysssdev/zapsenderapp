@@ -3,7 +3,7 @@ import { Car, ShieldAlert, Sparkles, ShoppingCart, Landmark, DollarSign, CheckCi
 
 const GringoApp = () => {
   const handleBuy = () => {
-    window.open('https://discord.gg/KJ9KmXay', '_blank');
+    window.open('https://discord.gg/pxPcmgVg', '_blank');
   };
 
   const options = [

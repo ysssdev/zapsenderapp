@@ -5,7 +5,7 @@ const ApiCassino = () => {
   const [activeTab, setActiveTab] = useState<'all' | 'sem-ggr' | 'com-ggr'>('all');
 
   const handleBuy = () => {
-    window.open('https://discord.gg/KJ9KmXay', '_blank');
+    window.open('https://discord.gg/pxPcmgVg', '_blank');
   };
 
   const semGgrOptions = [

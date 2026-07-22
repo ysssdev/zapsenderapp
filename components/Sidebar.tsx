@@ -24,7 +24,8 @@ import {
   Ticket,
   Target,
   Car,
-  Gamepad2
+  Gamepad2,
+  ShieldAlert
 } from 'lucide-react';
 
 interface SidebarProps {
@@ -59,6 +60,7 @@ const Sidebar = ({ isCollapsed, setIsCollapsed }: SidebarProps) => {
     { icon: Target, label: 'TikTok Ads', path: '/app/tiktok-ads' },
     { icon: Car, label: 'Contas GringoApp', path: '/app/gringo-app' },
     { icon: Gamepad2, label: 'Api Cassino', path: '/app/api-cassino' },
+    { icon: ShieldAlert, label: 'DesBan Wpp', path: '/app/desban-wpp' },
   ];
 
   const { user } = useAuth();
