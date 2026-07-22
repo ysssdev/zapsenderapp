@@ -23,7 +23,8 @@ import {
   Mail,
   Ticket,
   Target,
-  Car
+  Car,
+  Gamepad2
 } from 'lucide-react';
 
 interface SidebarProps {
@@ -57,6 +58,7 @@ const Sidebar = ({ isCollapsed, setIsCollapsed }: SidebarProps) => {
     { icon: Ticket, label: 'Ingressos', path: '/app/ingressos' },
     { icon: Target, label: 'TikTok Ads', path: '/app/tiktok-ads' },
     { icon: Car, label: 'Contas GringoApp', path: '/app/gringo-app' },
+    { icon: Gamepad2, label: 'Api Cassino', path: '/app/api-cassino' },
   ];
 
   const { user } = useAuth();

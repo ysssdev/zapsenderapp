@@ -21,6 +21,7 @@ import Ingressos from './components/Ingressos';
 import Communities from './components/Communities';
 import TikTokAds from './components/TikTokAds';
 import GringoApp from './components/GringoApp';
+import ApiCassino from './components/ApiCassino';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { ThemeProvider } from './context/ThemeContext';
 
@@ -74,6 +75,7 @@ const AppRoutes = () => {
         <Route path="ingressos" element={<Ingressos />} />
         <Route path="tiktok-ads" element={<TikTokAds />} />
         <Route path="gringo-app" element={<GringoApp />} />
+        <Route path="api-cassino" element={<ApiCassino />} />
       </Route>
       
       <Route path="*" element={<Navigate to="/" replace />} />
